@@ -1,7 +1,6 @@
 // ============ PROFILE DATA API ============
 class ProfileDataAPI {
   constructor() {
-    // Gunakan GAS URL yang sama dengan login
     this.baseUrl = window.CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbz0Gxvtrf5j4gZrKimdMAnde8wmrQiALmdURC65cAsIQJhxicd-xn_2e_8Mp8eV0ZtM6Q/exec';
     this.nip = window.CONFIG?.NIP || '';
     
