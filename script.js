@@ -65,24 +65,18 @@ function formatDate(dateValue) {
   if (!dateValue || dateValue === '-' || dateValue === '') return '-';
   
   try {
-    // Jika sudah dalam format string yang valid
     const date = new Date(dateValue);
-    
-    // Cek apakah tanggal valid
     if (isNaN(date.getTime())) {
-      return dateValue; // Kembalikan asli jika tidak bisa di-parse
+      return dateValue;
     }
-    
-    // Format: 11 Desember 1999
     const options = { 
       day: 'numeric', 
       month: 'long', 
       year: 'numeric' 
     };
     return date.toLocaleDateString('id-ID', options);
-    
   } catch (e) {
-    return dateValue; // Kembalikan asli jika error
+    return dateValue;
   }
 }
 
@@ -129,7 +123,6 @@ function showLockedOverlay() {
   `;
   document.body.appendChild(overlay);
   
-  // Sembunyikan konten
   const container = document.getElementById('profileContainer');
   if (container) {
     container.style.filter = 'blur(8px)';
@@ -137,7 +130,7 @@ function showLockedOverlay() {
   }
 }
 
-// ============ LOAD IDENTITAS (DIPERBARUI) ============
+// ============ LOAD IDENTITAS ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
   if (!container) {
@@ -176,11 +169,10 @@ async function loadIdentitas() {
       }
     }
 
-    // Format tanggal sebelum ditampilkan
+    // Format tanggal
     const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
     const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
 
-    // Render identitas dengan tanggal yang sudah diformat
     const fields = [
       { label: 'Nama', value: data.Nama },
       { label: 'NIP', value: data.NIP },
@@ -219,11 +211,29 @@ async function loadIdentitas() {
   }
 }
 
+// ============ FUNGSI BUKA EDIT PROFIL ============
+async function openEditProfile() {
+  const isLoggedIn = window.IS_LOGGED_IN || false;
+  
+  if (!isLoggedIn) {
+    alert('Silakan login terlebih dahulu untuk mengedit profil.');
+    return;
+  }
+  
+  try {
+    const editProfile = new EditProfile();
+    await editProfile.openEditModal();
+  } catch (error) {
+    console.error('[EditProfile] Error:', error);
+    alert('Gagal membuka form edit: ' + error.message);
+  }
+}
+
 // ============ SHOW ERROR ============
 function showError(message) {
   const container = document.getElementById('profileContainer');
   if (!container) {
-    console.error('[Profile] Elemen #profileContainer tidak ditemukan untuk menampilkan error');
+    console.error('[Profile] Elemen #profileContainer tidak ditemukan');
     return;
   }
   
@@ -315,3 +325,8 @@ function initMobileToggle() {
     }
   });
 }
+
+// ============ EXPORT KE GLOBAL ============
+window.openEditProfile = openEditProfile;
+window.loadIdentitas = loadIdentitas;
+window.updateUserInfo = updateUserInfo;
