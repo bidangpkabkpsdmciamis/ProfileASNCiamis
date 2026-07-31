@@ -1,7 +1,11 @@
 // ============ KONFIGURASI ============
-// Ganti URL di bawah dengan URL GAS yang sudah Anda deploy
 const CONFIG = {
+  // GAS URL untuk READ (membaca data)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
+  
+  // GAS URL untuk WRITE (menyimpan data) - Ganti dengan URL GAS Write Anda setelah deploy
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycby6x_G757zwedpShRjTVhlhaIarGShnF7E5Nrx6FTybr8dcB04jjr0FgA8ekg6j7gP9Yg/exec',
+  
   NIP: '',
   USER_NAME: 'Guest',
   USER_EMAIL: ''
@@ -67,3 +71,4 @@ window.IS_LOGGED_IN = IS_LOGGED_IN;
 console.log('[Profile] IS_LOGGED_IN:', IS_LOGGED_IN);
 console.log('[Profile] CONFIG.NIP:', CONFIG.NIP);
 console.log('[Profile] GAS_URL:', CONFIG.GAS_URL);
+console.log('[Profile] GAS_WRITE_URL:', CONFIG.GAS_WRITE_URL);
