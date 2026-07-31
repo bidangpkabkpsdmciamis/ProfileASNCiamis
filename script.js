@@ -60,6 +60,32 @@ document.addEventListener('DOMContentLoaded', async function() {
   initMobileToggle();
 });
 
+// ============ FUNGSI FORMAT TANGGAL ============
+function formatDate(dateValue) {
+  if (!dateValue || dateValue === '-' || dateValue === '') return '-';
+  
+  try {
+    // Jika sudah dalam format string yang valid
+    const date = new Date(dateValue);
+    
+    // Cek apakah tanggal valid
+    if (isNaN(date.getTime())) {
+      return dateValue; // Kembalikan asli jika tidak bisa di-parse
+    }
+    
+    // Format: 11 Desember 1999
+    const options = { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    };
+    return date.toLocaleDateString('id-ID', options);
+    
+  } catch (e) {
+    return dateValue; // Kembalikan asli jika error
+  }
+}
+
 // ============ UPDATE USER INFO ============
 function updateUserInfo() {
   const userNameEl = document.getElementById('userName');
@@ -111,7 +137,7 @@ function showLockedOverlay() {
   }
 }
 
-// ============ LOAD IDENTITAS ============
+// ============ LOAD IDENTITAS (DIPERBARUI) ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
   if (!container) {
@@ -150,7 +176,11 @@ async function loadIdentitas() {
       }
     }
 
-    // Render identitas
+    // Format tanggal sebelum ditampilkan
+    const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
+    const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
+
+    // Render identitas dengan tanggal yang sudah diformat
     const fields = [
       { label: 'Nama', value: data.Nama },
       { label: 'NIP', value: data.NIP },
@@ -158,13 +188,13 @@ async function loadIdentitas() {
       { label: 'Pangkat / Golongan', value: `${data.Pangkat || ''} / ${data.Golongan_Ruang || ''}` },
       { label: 'Email', value: data.Email },
       { label: 'No HP', value: data.No_HP },
-      { label: 'Tempat, Tanggal Lahir', value: `${data.Tempat_Lahir || ''}, ${data.Tanggal_Lahir || ''}` },
+      { label: 'Tempat, Tanggal Lahir', value: `${data.Tempat_Lahir || ''}, ${formattedTanggalLahir}` },
       { label: 'Jenis Kelamin', value: data.Jenis_Kelamin },
       { label: 'Agama', value: data.Agama },
       { label: 'Alamat', value: data.Alamat },
       { label: 'Unit Kerja', value: data.Unit_Kerja },
       { label: 'Jabatan', value: data.Jabatan },
-      { label: 'TMT Jabatan', value: data.TMT_Jabatan },
+      { label: 'TMT Jabatan', value: formattedTMTJabatan },
       { label: 'Pendidikan Terakhir', value: data.Pendidikan_Terakhir },
       { label: 'Tahun Lulus', value: data.Tahun_Lulus }
     ];
