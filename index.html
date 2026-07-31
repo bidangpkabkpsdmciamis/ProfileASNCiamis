@@ -79,6 +79,12 @@
         <h1 id="profileName">Memuat...</h1>
         <div class="nip" id="profileNip">NIP: -</div>
         <span class="badge" id="profileStatus">ASN</span>
+        <!-- TOMBOL EDIT PROFIL -->
+        <div style="margin-top: 15px;">
+          <button onclick="openEditProfile()" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem;">
+            <i class="fas fa-edit"></i> Edit Profil
+          </button>
+        </div>
       </div>
     </div>
 
@@ -198,10 +204,16 @@
   </div>
 
   <!-- ===== SCRIPTS (URUTAN PENTING) ===== -->
+  <!-- 1. Config dulu -->
   <script src="config.js"></script>
+  
+  <!-- 2. Components -->
   <script src="components/profile-data.js"></script>
   <script src="components/kompetensi.js"></script>
   <script src="components/spider-chart.js"></script>
+  <script src="components/edit-profile.js"></script>
+  
+  <!-- 3. Main script terakhir -->
   <script src="script.js"></script>
   
 </body>
