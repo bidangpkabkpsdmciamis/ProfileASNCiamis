@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil ASN - SINGGATERA</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Config & Components -->
+    <script src="config.js"></script>
+    <script src="profile-data.js"></script>
+    <script src="kompetensi.js"></script>
+    <script src="spider-chart.js"></script>
+  </head>
+  <body>
+    <!-- ===== PROFILE CONTAINER ===== -->
+    <div class="profile-container">
+      <!-- ===== PROFILE HEADER ===== -->
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="profile-info">
+          <h1 id="profileName">Memuat...</h1>
+          <div class="nip" id="profileNip">NIP: -</div>
+          <span class="badge" id="profileStatus">ASN</span>
+        </div>
+      </div>
+
+      <!-- ===== GRID ===== -->
+      <div class="profile-grid">
+        <!-- ===== IDENTITAS ===== -->
+        <div class="card" style="grid-column: 1 / 2">
+          <div class="card-header">
+            <h2>👤 Identitas ASN</h2>
+          </div>
+          <div class="identitas-list" id="identitasContainer">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Memuat data identitas...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CHART SPIDER ===== -->
+        <div class="card" style="grid-column: 2 / 3">
+          <div class="card-header">
+            <h2>🕸️ Diagram Kompetensi</h2>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="spiderChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== REKAP KOMPETENSI ===== -->
+      <div id="rekapContainer">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Memuat data rekapitulasi...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAIN SCRIPT ===== -->
+    <script src="script.js"></script>
+  </body>
+</html>
