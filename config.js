@@ -4,7 +4,7 @@ const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   
   // GAS URL untuk WRITE (menyimpan data) - Ganti dengan URL GAS Write Anda setelah deploy
-  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxrVDbonokZAxyrC-dOvvKJzc4yw38ErjDikDIUJPQEwd5vpFDAz_dprhrTJDH1qTMqFQ/exec',
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxgrroFCX-rj3XutVILU25gSLIqoocgb93iSfdeSGfjcLqDYabFnvbfRPr0Cb2GiZPNLg/exec',
   
   NIP: '',
   USER_NAME: 'Guest',
