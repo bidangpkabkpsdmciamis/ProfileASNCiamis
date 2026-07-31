@@ -7,18 +7,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
   
   // ===== CEK LOGIN =====
-  // Cek dari window.IS_LOGGED_IN yang sudah di-set di config.js
   const isLoggedIn = window.IS_LOGGED_IN || false;
   
-  console.log('[Profile] isLoggedIn:', isLoggedIn);
-  
   if (!isLoggedIn) {
-    console.log('[Profile] Not logged in, showing lock screen');
+    console.log('[Profile] Belum login, menampilkan lock screen');
     showLockedOverlay();
     return;
   }
 
-  console.log('[Profile] Login confirmed, loading profile data...');
+  console.log('[Profile] Login confirmed, loading data...');
 
   // ===== UPDATE HEADER =====
   updateUserInfo();
@@ -37,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await spiderChart.loadData();
     
   } catch (error) {
-    console.error('[Profile] Error loading data:', error);
+    console.error('[Profile] Error:', error);
     showError(error.message);
   }
 
@@ -53,11 +50,8 @@ function updateUserInfo() {
   const dropdownNameEl = document.getElementById('dropdownName');
   const dropdownEmailEl = document.getElementById('dropdownEmail');
   
-  // Gunakan data dari CONFIG yang sudah di-set
   const name = window.CONFIG?.USER_NAME || 'Guest';
   const email = window.CONFIG?.USER_EMAIL || '-';
-  
-  console.log('[Profile] Updating user info:', name, email);
   
   if (userNameEl) userNameEl.textContent = name;
   if (dropdownNameEl) dropdownNameEl.textContent = name;
@@ -93,7 +87,6 @@ function showLockedOverlay() {
   `;
   document.body.appendChild(overlay);
   
-  // Sembunyikan konten
   const container = document.getElementById('profileContainer');
   if (container) {
     container.style.filter = 'blur(8px)';
@@ -189,7 +182,6 @@ function initHeader() {
     });
   }
 
-  // User dropdown
   const userBtn = document.getElementById('userBtn');
   const userDropdown = document.getElementById('userDropdown');
   
@@ -204,7 +196,6 @@ function initHeader() {
     });
   }
 
-  // Logout
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
