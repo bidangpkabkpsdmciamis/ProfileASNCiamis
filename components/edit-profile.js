@@ -15,7 +15,6 @@ class EditProfile {
   // ===== BUKA MODAL EDIT =====
   async openEditModal() {
     try {
-      // Ambil data terbaru
       this.data = await this.api.getIdentitas();
       
       if (!this.data) {
@@ -34,7 +33,6 @@ class EditProfile {
 
   // ===== BUAT MODAL =====
   createModal() {
-    // Hapus modal jika sudah ada
     const existingModal = document.getElementById('editProfileModal');
     if (existingModal) {
       existingModal.remove();
@@ -74,7 +72,7 @@ class EditProfile {
           <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.8rem; color: var(--dark-blue);">
             ✏️ Edit Profil ASN
           </h2>
-          <button onclick="document.getElementById('editProfileModal').style.display='none'" style="
+          <button onclick="closeEditModal()" style="
             background: none;
             border: none;
             font-size: 1.8rem;
@@ -97,7 +95,7 @@ class EditProfile {
           ${this.generateFormFields()}
         </form>
 
-        <!-- VERIFIKASI KESESUAIAN DATA -->
+        <!-- VERIFIKASI -->
         <div style="
           margin-top: 25px;
           padding: 20px;
@@ -162,7 +160,7 @@ class EditProfile {
 
     document.body.appendChild(this.modal);
 
-    // Event listener untuk checkbox verifikasi
+    // Event listener checkbox
     const verificationCheck = document.getElementById('verificationCheck');
     const saveBtn = document.getElementById('saveProfileBtn');
 
@@ -178,7 +176,6 @@ class EditProfile {
       }
     });
 
-    // Event listener untuk tombol simpan
     saveBtn.addEventListener('click', () => {
       if (verificationCheck.checked) {
         this.saveData();
@@ -242,7 +239,6 @@ class EditProfile {
       'Pendidikan_Terakhir', 'Tahun_Lulus'
     ];
 
-    // Tampilkan NIP di header
     const nipDisplay = document.getElementById('editNipDisplay');
     if (nipDisplay) nipDisplay.textContent = data.NIP || '-';
 
@@ -251,7 +247,6 @@ class EditProfile {
       if (element) {
         let value = data[field] || '';
         
-        // Format tanggal untuk input date
         if (field === 'Tanggal_Lahir' || field === 'TMT_Jabatan') {
           if (value) {
             try {
@@ -272,7 +267,6 @@ class EditProfile {
   showModal() {
     if (this.modal) {
       this.modal.style.display = 'flex';
-      // Animasi masuk
       const content = this.modal.querySelector('div > div');
       if (content) {
         content.style.animation = 'fadeIn 0.3s ease';
@@ -280,17 +274,15 @@ class EditProfile {
     }
   }
 
-  // ===== SAVE DATA (DIPERBAIKI dengan CORS handling) =====
+  // ===== SAVE DATA =====
   async saveData() {
     const saveBtn = document.getElementById('saveProfileBtn');
     const originalText = saveBtn.innerHTML;
     
     try {
-      // Tampilkan loading
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
       saveBtn.disabled = true;
 
-      // Kumpulkan data dari form
       const fields = [
         'Nama', 'NIP', 'Status_ASN', 'Pangkat', 'Golongan_Ruang',
         'Email', 'No_HP', 'Tempat_Lahir', 'Tanggal_Lahir', 'Jenis_Kelamin',
@@ -309,7 +301,6 @@ class EditProfile {
       console.log('[EditProfile] Sending data:', updatedData);
       console.log('[EditProfile] To URL:', this.gasWriteUrl);
 
-      // Kirim ke GAS Write dengan mode CORS
       const response = await fetch(this.gasWriteUrl, {
         method: 'POST',
         mode: 'cors',
@@ -323,7 +314,6 @@ class EditProfile {
         })
       });
 
-      // Cek response
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -333,16 +323,16 @@ class EditProfile {
 
       if (result.success) {
         alert('✅ Data identitas berhasil diperbarui!');
-        // Tutup modal
         this.modal.style.display = 'none';
-        // Refresh data
+        
+        // Refresh data di halaman
         if (typeof loadIdentitas === 'function') {
           await loadIdentitas();
         }
         if (typeof updateUserInfo === 'function') {
           updateUserInfo();
         }
-        // Reload halaman untuk memastikan data terbaru
+        
         setTimeout(() => {
           location.reload();
         }, 1000);
@@ -353,7 +343,6 @@ class EditProfile {
     } catch (error) {
       console.error('[EditProfile] Save error:', error);
       
-      // Tampilkan pesan error yang lebih jelas
       let errorMessage = error.message;
       if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
         errorMessage = 'Masalah koneksi ke server. Pastikan:\n\n1. GAS Write sudah di-deploy dengan akses "Anyone"\n2. URL di config.js sudah diupdate\n3. Koneksi internet stabil\n\nURL saat ini: ' + this.gasWriteUrl;
@@ -362,14 +351,13 @@ class EditProfile {
       alert('❌ Gagal menyimpan data:\n\n' + errorMessage);
       
     } finally {
-      // Reset tombol
       saveBtn.innerHTML = originalText;
       saveBtn.disabled = false;
     }
   }
 }
 
-// ============ FUNGSI CLOSE MODAL GLOBAL ============
+// ============ FUNGSI CLOSE MODAL ============
 function closeEditModal() {
   const modal = document.getElementById('editProfileModal');
   if (modal) {
