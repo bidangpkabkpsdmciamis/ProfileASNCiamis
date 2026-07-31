@@ -4,19 +4,19 @@ class ProfileDataAPI {
     this.baseUrl = window.CONFIG?.GAS_URL || '';
     this.nip = window.CONFIG?.NIP || '';
     
-    console.log('[ProfileDataAPI] Initialized with NIP:', this.nip);
+    console.log('[ProfileDataAPI] Initialized');
+    console.log('[ProfileDataAPI] NIP:', this.nip);
     console.log('[ProfileDataAPI] GAS_URL:', this.baseUrl);
   }
 
   // ===== GET IDENTITAS =====
   async getIdentitas() {
     if (!this.nip) {
-      console.error('[ProfileDataAPI] NIP kosong, cek login terlebih dahulu');
       throw new Error('NIP tidak ditemukan. Silakan login terlebih dahulu.');
     }
 
     const url = `${this.baseUrl}?action=getIdentitas&nip=${encodeURIComponent(this.nip)}`;
-    console.log('[ProfileDataAPI] Fetching identitas from:', url);
+    console.log('[ProfileDataAPI] Fetching identitas:', url);
     
     try {
       const response = await fetch(url);
@@ -34,7 +34,7 @@ class ProfileDataAPI {
       
       return result.data;
     } catch (error) {
-      console.error('[ProfileDataAPI] Error getIdentitas:', error);
+      console.error('[ProfileDataAPI] Error:', error);
       throw error;
     }
   }
@@ -46,15 +46,10 @@ class ProfileDataAPI {
     }
 
     const url = `${this.baseUrl}?action=getRekapKompetensi&nip=${encodeURIComponent(this.nip)}&tahun=${encodeURIComponent(tahun)}`;
-    console.log('[ProfileDataAPI] Fetching rekap from:', url);
+    console.log('[ProfileDataAPI] Fetching rekap:', url);
     
     try {
       const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const result = await response.json();
       
       if (!result.success) {
@@ -63,7 +58,7 @@ class ProfileDataAPI {
       
       return result.data;
     } catch (error) {
-      console.error('[ProfileDataAPI] Error getRekapKompetensi:', error);
+      console.error('[ProfileDataAPI] Error:', error);
       throw error;
     }
   }
@@ -75,15 +70,10 @@ class ProfileDataAPI {
     }
 
     const url = `${this.baseUrl}?action=getChartData&nip=${encodeURIComponent(this.nip)}`;
-    console.log('[ProfileDataAPI] Fetching chart from:', url);
+    console.log('[ProfileDataAPI] Fetching chart:', url);
     
     try {
       const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const result = await response.json();
       
       if (!result.success) {
@@ -92,11 +82,10 @@ class ProfileDataAPI {
       
       return result.data;
     } catch (error) {
-      console.error('[ProfileDataAPI] Error getChartData:', error);
+      console.error('[ProfileDataAPI] Error:', error);
       throw error;
     }
   }
 }
 
-// Export untuk digunakan
 window.ProfileDataAPI = ProfileDataAPI;
