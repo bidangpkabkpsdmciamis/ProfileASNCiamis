@@ -2,11 +2,11 @@
 class KompetensiRenderer {
   constructor() {
     this.api = new ProfileDataAPI();
-    this.currentTahun = "all";
+    this.currentTahun = 'all';
   }
 
   // ===== RENDER REKAP =====
-  async renderRekap(containerId, tahun = "all") {
+  async renderRekap(containerId, tahun = 'all') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -20,7 +20,7 @@ class KompetensiRenderer {
     try {
       this.currentTahun = tahun;
       const data = await this.api.getRekapKompetensi(tahun);
-
+      
       // Render statistik
       const statHtml = this.renderStats(data.statistik);
       const tableHtml = this.renderTable(data.data);
@@ -46,12 +46,13 @@ class KompetensiRenderer {
       `;
 
       // Event listener untuk filter tahun
-      const filterSelect = container.querySelector("#tahunFilter");
+      const filterSelect = container.querySelector('#tahunFilter');
       if (filterSelect) {
-        filterSelect.addEventListener("change", (e) => {
+        filterSelect.addEventListener('change', (e) => {
           this.renderRekap(containerId, e.target.value);
         });
       }
+
     } catch (error) {
       container.innerHTML = `
         <div class="card" style="padding: 40px; text-align: center; color: var(--danger);">
@@ -68,18 +69,15 @@ class KompetensiRenderer {
 
   // ===== RENDER STATS =====
   renderStats(statistik) {
-    if (!statistik) return "";
+    if (!statistik) return '';
 
     const kategoriItems = Object.entries(statistik.kategori || {})
-      .map(
-        ([key, value]) => `
+      .map(([key, value]) => `
         <div class="stat-box">
           <div class="number">${value}</div>
           <div class="label">${key}</div>
         </div>
-      `,
-      )
-      .join("");
+      `).join('');
 
     return `
       <div class="rekap-stats">
@@ -107,25 +105,15 @@ class KompetensiRenderer {
       `;
     }
 
-    const headers = [
-      "No",
-      "Nama Pelatihan",
-      "Jenis",
-      "Lembaga",
-      "Durasi (JP)",
-      "Nilai",
-      "Status",
-    ];
-    const rows = data
-      .map(
-        (item, index) => `
+    const headers = ['No', 'Nama Pelatihan', 'Jenis', 'Lembaga', 'Durasi (JP)', 'Nilai', 'Status'];
+    const rows = data.map((item, index) => `
       <tr>
         <td>${index + 1}</td>
-        <td><strong>${item.Nama_Pelatihan || "-"}</strong></td>
-        <td>${item.Jenis_Pelatihan || "-"}</td>
-        <td>${item.Lembaga_Penyelenggara || "-"}</td>
+        <td><strong>${item.Nama_Pelatihan || '-'}</strong></td>
+        <td>${item.Jenis_Pelatihan || '-'}</td>
+        <td>${item.Lembaga_Penyelenggara || '-'}</td>
         <td>${item.Durasi_Jam || 0}</td>
-        <td>${item.Nilai || "-"}</td>
+        <td>${item.Nilai || '-'}</td>
         <td>
           <span style="
             display: inline-block;
@@ -133,22 +121,20 @@ class KompetensiRenderer {
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            background: ${item.Status === "Selesai" ? "#10b981" : "#f59e0b"};
+            background: ${item.Status === 'Selesai' ? '#10b981' : '#f59e0b'};
             color: white;
           ">
-            ${item.Status || "Proses"}
+            ${item.Status || 'Proses'}
           </span>
         </td>
       </tr>
-    `,
-      )
-      .join("");
+    `).join('');
 
     return `
       <table class="rekap-table">
         <thead>
           <tr>
-            ${headers.map((h) => `<th>${h}</th>`).join("")}
+            ${headers.map(h => `<th>${h}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
@@ -161,8 +147,8 @@ class KompetensiRenderer {
   // ===== RENDER FILTER =====
   renderFilter(tahunList) {
     let options = `<option value="all">📅 Semua Tahun</option>`;
-    tahunList.forEach((tahun) => {
-      const selected = this.currentTahun === tahun ? "selected" : "";
+    tahunList.forEach(tahun => {
+      const selected = this.currentTahun === tahun ? 'selected' : '';
       options += `<option value="${tahun}" ${selected}>${tahun}</option>`;
     });
 
