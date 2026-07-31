@@ -67,7 +67,7 @@
     </div>
   </header>
 
-  <!-- ===== PROFILE CONTAINER (PENTING: ID ini harus ada) ===== -->
+  <!-- ===== PROFILE CONTAINER ===== -->
   <div class="profile-container" id="profileContainer">
     
     <!-- ===== PROFILE HEADER ===== -->
@@ -103,7 +103,7 @@
         <div class="card-header">
           <h2>🕸️ Diagram Kompetensi</h2>
         </div>
-        <div class="chart-wrapper">
+        <div class="chart-wrapper" id="chartWrapper">
           <canvas id="spiderChart"></canvas>
         </div>
       </div>
@@ -198,15 +198,10 @@
   </div>
 
   <!-- ===== SCRIPTS (URUTAN PENTING) ===== -->
-  <!-- 1. Config dulu -->
   <script src="config.js"></script>
-  
-  <!-- 2. Components -->
   <script src="components/profile-data.js"></script>
   <script src="components/kompetensi.js"></script>
   <script src="components/spider-chart.js"></script>
-  
-  <!-- 3. Main script terakhir -->
   <script src="script.js"></script>
   
 </body>
