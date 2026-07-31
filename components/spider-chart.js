@@ -1,18 +1,40 @@
 // ============ SPIDER CHART ============
 class SpiderChart {
   constructor(canvasId) {
+    this.canvasId = canvasId;
     this.canvas = document.getElementById(canvasId);
-    if (!this.canvas) return;
-    
-    this.ctx = this.canvas.getContext('2d');
     this.chart = null;
     this.api = new ProfileDataAPI();
+    
+    if (!this.canvas) {
+      console.error(`[SpiderChart] Canvas dengan ID "${canvasId}" tidak ditemukan!`);
+    } else {
+      console.log(`[SpiderChart] Canvas ditemukan`);
+    }
   }
 
-  // ===== LOAD DATA =====
   async loadData() {
+    if (!this.canvas) {
+      console.error('[SpiderChart] Canvas tidak tersedia');
+      const container = document.querySelector('.chart-wrapper');
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--danger);">
+            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+            <p>Error: Canvas chart tidak ditemukan</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
     try {
       const container = this.canvas.parentElement;
+      if (!container) {
+        console.error('[SpiderChart] Parent container tidak ditemukan');
+        return;
+      }
+
       container.innerHTML = `
         <div class="loading" style="min-height: 300px;">
           <div class="spinner"></div>
@@ -21,28 +43,39 @@ class SpiderChart {
       `;
 
       const data = await this.api.getChartData();
-      
-      // Render chart
       this.render(data);
     } catch (error) {
       console.error('[SpiderChart] Error:', error);
-      this.canvas.parentElement.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; color: var(--gray);">
-          <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 15px; color: var(--danger);"></i>
-          <h3>Gagal Memuat Chart</h3>
-          <p>${error.message}</p>
-          <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">
-            <i class="fas fa-sync"></i> Coba Lagi
-          </button>
-        </div>
-      `;
+      const container = this.canvas?.parentElement;
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: var(--gray);">
+            <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 15px; color: var(--danger);"></i>
+            <h3>Gagal Memuat Chart</h3>
+            <p>${error.message}</p>
+            <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">
+              <i class="fas fa-sync"></i> Coba Lagi
+            </button>
+          </div>
+        `;
+      }
     }
   }
 
-  // ===== RENDER =====
   render(data) {
+    if (!this.canvas) {
+      console.error('[SpiderChart] Canvas tidak ada saat render');
+      return;
+    }
+
+    const container = this.canvas.parentElement;
+    if (!container) {
+      console.error('[SpiderChart] Container tidak ada saat render');
+      return;
+    }
+
     if (!data || !data.labels || data.labels.length === 0) {
-      this.canvas.parentElement.innerHTML = `
+      container.innerHTML = `
         <div style="text-align: center; padding: 60px 20px; color: var(--gray);">
           <i class="fas fa-chart-pie" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
           <h3>Belum Ada Data Kompetensi</h3>
@@ -52,11 +85,9 @@ class SpiderChart {
       return;
     }
 
-    // Hapus loading
-    this.canvas.parentElement.innerHTML = '';
-    this.canvas.parentElement.appendChild(this.canvas);
+    container.innerHTML = '';
+    container.appendChild(this.canvas);
 
-    // Gunakan CDN Chart.js jika belum ada
     if (typeof Chart === 'undefined') {
       this.loadChartJs(() => this.renderChart(data));
     } else {
@@ -64,8 +95,9 @@ class SpiderChart {
     }
   }
 
-  // ===== RENDER CHART =====
   renderChart(data) {
+    if (!this.canvas) return;
+
     if (this.chart) {
       this.chart.destroy();
     }
@@ -104,10 +136,7 @@ class SpiderChart {
           legend: {
             position: 'bottom',
             labels: {
-              font: {
-                size: 12,
-                weight: '600'
-              },
+              font: { size: 12, weight: '600' },
               padding: 20,
               usePointStyle: true,
               pointStyle: 'circle'
@@ -116,9 +145,7 @@ class SpiderChart {
           tooltip: {
             callbacks: {
               label: function(context) {
-                const label = context.dataset.label || '';
-                const value = context.parsed.r || 0;
-                return `${label}: ${value.toFixed(1)}`;
+                return `${context.dataset.label || ''}: ${(context.parsed.r || 0).toFixed(1)}`;
               }
             }
           }
@@ -127,23 +154,11 @@ class SpiderChart {
           r: {
             min: 0,
             max: 100,
-            ticks: {
-              stepSize: 20,
-              font: {
-                size: 10
-              }
-            },
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
-            },
-            angleLines: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            },
+            ticks: { stepSize: 20, font: { size: 10 } },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
             pointLabels: {
-              font: {
-                size: 12,
-                weight: '600'
-              },
+              font: { size: 12, weight: '600' },
               color: '#1e293b'
             }
           }
@@ -152,11 +167,22 @@ class SpiderChart {
     });
   }
 
-  // ===== LOAD CHART.JS =====
   loadChartJs(callback) {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
     script.onload = callback;
+    script.onerror = function() {
+      console.error('[SpiderChart] Gagal memuat Chart.js');
+      const container = this.canvas?.parentElement;
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--danger);">
+            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+            <p>Gagal memuat library Chart.js. Periksa koneksi internet Anda.</p>
+          </div>
+        `;
+      }
+    }.bind(this);
     document.head.appendChild(script);
   }
 }
