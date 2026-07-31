@@ -79,10 +79,11 @@
         <h1 id="profileName">Memuat...</h1>
         <div class="nip" id="profileNip">NIP: -</div>
         <span class="badge" id="profileStatus">ASN</span>
-        <!-- TOMBOL EDIT PROFIL -->
+        
+        <!-- ===== TOMBOL EDIT PROFIL (DIPERBAIKI) ===== -->
         <div style="margin-top: 15px;">
-          <button onclick="openEditProfile()" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem;">
-            <i class="fas fa-edit"></i> Edit Profil
+          <button id="editProfileBtn" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem; min-width: 140px;">
+            <i class="fas fa-edit"></i> <span id="editBtnText">Edit Profil</span>
           </button>
         </div>
       </div>
