@@ -6,21 +6,24 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('[Profile] window.CONFIG:', window.CONFIG);
   console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
   
-  // ===== INIT HEADER =====
-  initHeader();
-  
   // ===== CEK LOGIN =====
+  // Cek dari window.IS_LOGGED_IN yang sudah di-set di config.js
   const isLoggedIn = window.IS_LOGGED_IN || false;
   
+  console.log('[Profile] isLoggedIn:', isLoggedIn);
+  
   if (!isLoggedIn) {
+    console.log('[Profile] Not logged in, showing lock screen');
     showLockedOverlay();
     return;
   }
 
-  // ===== UPDATE USER INFO DI HEADER =====
+  console.log('[Profile] Login confirmed, loading profile data...');
+
+  // ===== UPDATE HEADER =====
   updateUserInfo();
 
-  // ===== LOAD DATA PROFIL =====
+  // ===== LOAD DATA =====
   try {
     // 1. Load Identitas
     await loadIdentitas();
@@ -34,14 +37,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     await spiderChart.loadData();
     
   } catch (error) {
-    console.error('[Profile] Error loading profile:', error);
+    console.error('[Profile] Error loading data:', error);
     showError(error.message);
   }
 
-  // ===== SCROLL TO TOP =====
+  // ===== INIT COMPONENTS =====
+  initHeader();
   initScrollTop();
-
-  // ===== MOBILE TOGGLE =====
   initMobileToggle();
 });
 
@@ -51,10 +53,11 @@ function updateUserInfo() {
   const dropdownNameEl = document.getElementById('dropdownName');
   const dropdownEmailEl = document.getElementById('dropdownEmail');
   
-  // Gunakan USER_DATA dari config
-  const userData = window.USER_DATA || {};
-  const name = userData.name || window.CONFIG?.USER_NAME || 'Guest';
-  const email = userData.email || window.CONFIG?.USER_EMAIL || '-';
+  // Gunakan data dari CONFIG yang sudah di-set
+  const name = window.CONFIG?.USER_NAME || 'Guest';
+  const email = window.CONFIG?.USER_EMAIL || '-';
+  
+  console.log('[Profile] Updating user info:', name, email);
   
   if (userNameEl) userNameEl.textContent = name;
   if (dropdownNameEl) dropdownNameEl.textContent = name;
@@ -63,7 +66,6 @@ function updateUserInfo() {
 
 // ============ SHOW LOCKED OVERLAY ============
 function showLockedOverlay() {
-  // Cek apakah overlay sudah ada
   if (document.getElementById('lockedOverlay')) return;
   
   const overlay = document.createElement('div');
