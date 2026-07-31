@@ -25,7 +25,7 @@ class SpiderChart {
       // Render chart
       this.render(data);
     } catch (error) {
-      console.error('Error load chart:', error);
+      console.error('[SpiderChart] Error:', error);
       this.canvas.parentElement.innerHTML = `
         <div style="text-align: center; padding: 60px 20px; color: var(--gray);">
           <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 15px; color: var(--danger);"></i>
