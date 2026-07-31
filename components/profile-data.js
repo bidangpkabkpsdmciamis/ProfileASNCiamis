@@ -38,7 +38,7 @@ class ProfileDataAPI {
     }
   }
 
-  // ===== GET REKAP KOMPETENSI =====
+  // ===== GET REKAP KOMPETENSI (DIPERBARUI) =====
   async getRekapKompetensi(tahun = 'all') {
     if (!this.nip) {
       throw new Error('NIP tidak ditemukan');
@@ -55,7 +55,18 @@ class ProfileDataAPI {
         throw new Error(result.error || 'Gagal mengambil data rekap kompetensi');
       }
       
-      return result.data;
+      // Pastikan data memiliki field Link_Sertifikat
+      const data = result.data;
+      if (data && data.data) {
+        data.data = data.data.map(item => ({
+          ...item,
+          // Support berbagai kemungkinan nama kolom
+          Link_Sertifikat: item.Link_Sertifikat || item.link_sertifikat || item['Link Sertifikat'] || item['link_sertifikat'] || '-'
+        }));
+      }
+      
+      console.log('[ProfileDataAPI] Rekap data:', data);
+      return data;
     } catch (error) {
       console.error('[ProfileDataAPI] Error:', error);
       throw error;
