@@ -6,6 +6,10 @@ class EditProfile {
     this.nip = window.CONFIG?.NIP || '';
     this.data = null;
     this.modal = null;
+    
+    console.log('[EditProfile] Initialized');
+    console.log('[EditProfile] GAS_WRITE_URL:', this.gasWriteUrl);
+    console.log('[EditProfile] NIP:', this.nip);
   }
 
   // ===== BUKA MODAL EDIT =====
@@ -123,7 +127,7 @@ class EditProfile {
         </div>
 
         <div style="display: flex; gap: 15px; margin-top: 25px; justify-content: flex-end;">
-          <button type="button" onclick="document.getElementById('editProfileModal').style.display='none'" style="
+          <button type="button" onclick="closeEditModal()" style="
             padding: 12px 28px;
             border: 2px solid var(--gray);
             border-radius: 12px;
@@ -276,7 +280,7 @@ class EditProfile {
     }
   }
 
-  // ===== SAVE DATA =====
+  // ===== SAVE DATA (DIPERBAIKI dengan CORS handling) =====
   async saveData() {
     const saveBtn = document.getElementById('saveProfileBtn');
     const originalText = saveBtn.innerHTML;
@@ -302,9 +306,13 @@ class EditProfile {
         }
       });
 
-      // Kirim ke GAS Write
+      console.log('[EditProfile] Sending data:', updatedData);
+      console.log('[EditProfile] To URL:', this.gasWriteUrl);
+
+      // Kirim ke GAS Write dengan mode CORS
       const response = await fetch(this.gasWriteUrl, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -315,23 +323,44 @@ class EditProfile {
         })
       });
 
+      // Cek response
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('[EditProfile] Response:', result);
 
       if (result.success) {
         alert('✅ Data identitas berhasil diperbarui!');
         // Tutup modal
         this.modal.style.display = 'none';
         // Refresh data
-        await loadIdentitas();
-        // Update header
-        updateUserInfo();
+        if (typeof loadIdentitas === 'function') {
+          await loadIdentitas();
+        }
+        if (typeof updateUserInfo === 'function') {
+          updateUserInfo();
+        }
+        // Reload halaman untuk memastikan data terbaru
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } else {
         throw new Error(result.error || 'Gagal menyimpan data');
       }
 
     } catch (error) {
       console.error('[EditProfile] Save error:', error);
-      alert('❌ Gagal menyimpan data: ' + error.message);
+      
+      // Tampilkan pesan error yang lebih jelas
+      let errorMessage = error.message;
+      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        errorMessage = 'Masalah koneksi ke server. Pastikan:\n\n1. GAS Write sudah di-deploy dengan akses "Anyone"\n2. URL di config.js sudah diupdate\n3. Koneksi internet stabil\n\nURL saat ini: ' + this.gasWriteUrl;
+      }
+      
+      alert('❌ Gagal menyimpan data:\n\n' + errorMessage);
+      
     } finally {
       // Reset tombol
       saveBtn.innerHTML = originalText;
@@ -340,5 +369,14 @@ class EditProfile {
   }
 }
 
+// ============ FUNGSI CLOSE MODAL GLOBAL ============
+function closeEditModal() {
+  const modal = document.getElementById('editProfileModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
 // ============ EXPORT ============
 window.EditProfile = EditProfile;
+window.closeEditModal = closeEditModal;
