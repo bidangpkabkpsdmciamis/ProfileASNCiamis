@@ -54,6 +54,7 @@ class KompetensiRenderer {
       }
 
     } catch (error) {
+      console.error('[KompetensiRenderer] Error:', error);
       container.innerHTML = `
         <div class="card" style="padding: 40px; text-align: center; color: var(--danger);">
           <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 15px;"></i>
