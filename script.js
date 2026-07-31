@@ -1,11 +1,17 @@
 // ============ MAIN SCRIPT ============
 document.addEventListener('DOMContentLoaded', async function() {
   
+  console.log('=== PROFILE PAGE START ===');
+  console.log('[Profile] localStorage loginData:', localStorage.getItem('loginData'));
+  console.log('[Profile] window.CONFIG:', window.CONFIG);
+  console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
+  
   // ===== INIT HEADER =====
   initHeader();
   
-  // ===== CEK LOGIN (SAMA DENGAN HOME & EVALUASI) =====
-  const isLoggedIn = checkLoginStatus();
+  // ===== CEK LOGIN =====
+  const isLoggedIn = window.IS_LOGGED_IN || false;
+  
   if (!isLoggedIn) {
     showLockedOverlay();
     return;
@@ -28,17 +34,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     await spiderChart.loadData();
     
   } catch (error) {
-    console.error('Error loading profile:', error);
-    document.getElementById('profileContainer').innerHTML = `
-      <div style="text-align: center; padding: 80px 20px;">
-        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
-        <h2>Gagal Memuat Profil</h2>
-        <p style="color: var(--gray);">${error.message}</p>
-        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
-          <i class="fas fa-sync"></i> Refresh
-        </button>
-      </div>
-    `;
+    console.error('[Profile] Error loading profile:', error);
+    showError(error.message);
   }
 
   // ===== SCROLL TO TOP =====
@@ -48,39 +45,27 @@ document.addEventListener('DOMContentLoaded', async function() {
   initMobileToggle();
 });
 
-// ============ CHECK LOGIN (SAMA DENGAN HOME & EVALUASI) ============
-function checkLoginStatus() {
-  const loginData = localStorage.getItem('loginData');
+// ============ UPDATE USER INFO ============
+function updateUserInfo() {
+  const userNameEl = document.getElementById('userName');
+  const dropdownNameEl = document.getElementById('dropdownName');
+  const dropdownEmailEl = document.getElementById('dropdownEmail');
   
-  if (!loginData) return false;
+  // Gunakan USER_DATA dari config
+  const userData = window.USER_DATA || {};
+  const name = userData.name || window.CONFIG?.USER_NAME || 'Guest';
+  const email = userData.email || window.CONFIG?.USER_EMAIL || '-';
   
-  try {
-    const userData = JSON.parse(loginData);
-    const loginTime = new Date(userData.loginTime);
-    const currentTime = new Date();
-    
-    const isSameDay = 
-      loginTime.getDate() === currentTime.getDate() &&
-      loginTime.getMonth() === currentTime.getMonth() &&
-      loginTime.getFullYear() === currentTime.getFullYear();
-    
-    if (isSameDay && userData.nip) {
-      window.CONFIG.NIP = userData.nip;
-      window.CONFIG.USER_NAME = userData.name || 'Guest';
-      window.CONFIG.USER_EMAIL = userData.email || '';
-      return true;
-    }
-    
-    localStorage.removeItem('loginData');
-    return false;
-  } catch (e) {
-    localStorage.removeItem('loginData');
-    return false;
-  }
+  if (userNameEl) userNameEl.textContent = name;
+  if (dropdownNameEl) dropdownNameEl.textContent = name;
+  if (dropdownEmailEl) dropdownEmailEl.textContent = email;
 }
 
 // ============ SHOW LOCKED OVERLAY ============
 function showLockedOverlay() {
+  // Cek apakah overlay sudah ada
+  if (document.getElementById('lockedOverlay')) return;
+  
   const overlay = document.createElement('div');
   overlay.className = 'locked-overlay';
   overlay.id = 'lockedOverlay';
@@ -114,19 +99,6 @@ function showLockedOverlay() {
   }
 }
 
-// ============ UPDATE USER INFO ============
-function updateUserInfo() {
-  const userName = document.getElementById('userName');
-  const dropdownName = document.getElementById('dropdownName');
-  const dropdownEmail = document.getElementById('dropdownEmail');
-  
-  if (window.CONFIG.USER_NAME) {
-    userName.textContent = window.CONFIG.USER_NAME;
-    dropdownName.textContent = window.CONFIG.USER_NAME;
-    dropdownEmail.textContent = window.CONFIG.USER_EMAIL || '-';
-  }
-}
-
 // ============ LOAD IDENTITAS ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
@@ -139,23 +111,27 @@ async function loadIdentitas() {
     if (!data) {
       container.innerHTML = `
         <div style="text-align: center; padding: 30px; color: var(--gray);">
-          <p>Data identitas tidak ditemukan</p>
+          <p>Data identitas tidak ditemukan untuk NIP: ${window.CONFIG?.NIP || '-'}</p>
         </div>
       `;
       return;
     }
 
     // Update header
-    document.querySelector('.profile-avatar').innerHTML = 
-      `<i class="fas fa-user-circle"></i>`;
-    document.getElementById('profileName').textContent = data.Nama || 'ASN';
-    document.getElementById('profileNip').textContent = `NIP: ${data.NIP || '-'}`;
+    const avatarEl = document.querySelector('.profile-avatar');
+    if (avatarEl) avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
     
-    const badge = document.getElementById('profileStatus');
-    if (badge) {
-      badge.textContent = data.Status_ASN || 'ASN';
+    const nameEl = document.getElementById('profileName');
+    if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
+    
+    const nipEl = document.getElementById('profileNip');
+    if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
+    
+    const badgeEl = document.getElementById('profileStatus');
+    if (badgeEl) {
+      badgeEl.textContent = data.Status_ASN || 'ASN';
       if (data.Status_ASN === 'PNS') {
-        badge.classList.add('gold');
+        badgeEl.classList.add('gold');
       }
     }
 
@@ -186,10 +162,13 @@ async function loadIdentitas() {
     `).join('');
 
   } catch (error) {
-    console.error('Error loadIdentitas:', error);
+    console.error('[Profile] Error loadIdentitas:', error);
     container.innerHTML = `
       <div style="text-align: center; padding: 30px; color: var(--danger);">
         <p>Gagal memuat data identitas: ${error.message}</p>
+        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">
+          <i class="fas fa-sync"></i> Coba Lagi
+        </button>
       </div>
     `;
   }
@@ -198,38 +177,47 @@ async function loadIdentitas() {
 // ============ INIT HEADER ============
 function initHeader() {
   const header = document.getElementById('header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
-  });
+  if (header) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  }
 
   // User dropdown
   const userBtn = document.getElementById('userBtn');
   const userDropdown = document.getElementById('userDropdown');
   
-  userBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.classList.toggle('active');
-  });
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('active');
+    });
 
-  document.addEventListener('click', () => {
-    userDropdown.classList.remove('active');
-  });
+    document.addEventListener('click', () => {
+      userDropdown.classList.remove('active');
+    });
+  }
 
   // Logout
-  document.getElementById('logoutBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    localStorage.removeItem('loginData');
-    window.location.href = 'https://bidangpkabkpsdmciamis.github.io/Singgatera/';
-  });
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('loginData');
+      window.location.href = 'https://bidangpkabkpsdmciamis.github.io/Singgatera/';
+    });
+  }
 }
 
 // ============ INIT SCROLL TOP ============
 function initScrollTop() {
   const scrollTopBtn = document.getElementById('scrollTop');
+  if (!scrollTopBtn) return;
+  
   window.addEventListener('scroll', () => {
     if (window.scrollY > 500) {
       scrollTopBtn.classList.add('active');
@@ -248,6 +236,8 @@ function initMobileToggle() {
   const mobileToggle = document.getElementById('mobileToggle');
   const nav = document.getElementById('nav');
   
+  if (!mobileToggle || !nav) return;
+  
   mobileToggle.addEventListener('click', () => {
     nav.classList.toggle('active');
     mobileToggle.innerHTML = nav.classList.contains('active')
@@ -261,4 +251,21 @@ function initMobileToggle() {
       mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
     }
   });
+}
+
+// ============ SHOW ERROR ============
+function showError(message) {
+  const container = document.getElementById('profileContainer');
+  if (container) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 80px 20px;">
+        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
+        <h2>Gagal Memuat Profil</h2>
+        <p style="color: var(--gray);">${message}</p>
+        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
+          <i class="fas fa-sync"></i> Refresh
+        </button>
+      </div>
+    `;
+  }
 }
