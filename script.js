@@ -6,6 +6,22 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('[Profile] window.CONFIG:', window.CONFIG);
   console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
   
+  // ===== CEK APAKAH ELEMEN ADA =====
+  const container = document.getElementById('profileContainer');
+  if (!container) {
+    console.error('[Profile] ERROR: Elemen #profileContainer tidak ditemukan!');
+    document.body.innerHTML = `
+      <div style="text-align: center; padding: 80px 20px; font-family: Arial, sans-serif;">
+        <h2>⚠️ Error Halaman</h2>
+        <p style="color: #666;">Elemen container tidak ditemukan. Pastikan file index.html sudah benar.</p>
+        <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="btn btn-primary" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px;">
+          Kembali ke Home
+        </a>
+      </div>
+    `;
+    return;
+  }
+  
   // ===== CEK LOGIN =====
   const isLoggedIn = window.IS_LOGGED_IN || false;
   
@@ -87,6 +103,7 @@ function showLockedOverlay() {
   `;
   document.body.appendChild(overlay);
   
+  // Sembunyikan konten
   const container = document.getElementById('profileContainer');
   if (container) {
     container.style.filter = 'blur(8px)';
@@ -97,7 +114,10 @@ function showLockedOverlay() {
 // ============ LOAD IDENTITAS ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
-  if (!container) return;
+  if (!container) {
+    console.error('[Profile] Elemen #identitasContainer tidak ditemukan');
+    return;
+  }
 
   try {
     const api = new ProfileDataAPI();
@@ -167,6 +187,26 @@ async function loadIdentitas() {
       </div>
     `;
   }
+}
+
+// ============ SHOW ERROR ============
+function showError(message) {
+  const container = document.getElementById('profileContainer');
+  if (!container) {
+    console.error('[Profile] Elemen #profileContainer tidak ditemukan untuk menampilkan error');
+    return;
+  }
+  
+  container.innerHTML = `
+    <div style="text-align: center; padding: 80px 20px;">
+      <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
+      <h2>Gagal Memuat Profil</h2>
+      <p style="color: var(--gray);">${message}</p>
+      <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
+        <i class="fas fa-sync"></i> Refresh
+      </button>
+    </div>
+  `;
 }
 
 // ============ INIT HEADER ============
@@ -244,21 +284,4 @@ function initMobileToggle() {
       mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
     }
   });
-}
-
-// ============ SHOW ERROR ============
-function showError(message) {
-  const container = document.getElementById('profileContainer');
-  if (container) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 80px 20px;">
-        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
-        <h2>Gagal Memuat Profil</h2>
-        <p style="color: var(--gray);">${message}</p>
-        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
-          <i class="fas fa-sync"></i> Refresh
-        </button>
-      </div>
-    `;
-  }
 }
