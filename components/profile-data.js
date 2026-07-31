@@ -1,12 +1,12 @@
 // ============ PROFILE DATA API ============
 class ProfileDataAPI {
   constructor() {
-    this.baseUrl = window.CONFIG?.GAS_URL || '';
+    // Gunakan GAS URL yang sama dengan login
+    this.baseUrl = window.CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbz0Gxvtrf5j4gZrKimdMAnde8wmrQiALmdURC65cAsIQJhxicd-xn_2e_8Mp8eV0ZtM6Q/exec';
     this.nip = window.CONFIG?.NIP || '';
     
-    console.log('[ProfileDataAPI] Initialized');
+    console.log('[ProfileDataAPI] Menggunakan GAS URL:', this.baseUrl);
     console.log('[ProfileDataAPI] NIP:', this.nip);
-    console.log('[ProfileDataAPI] GAS_URL:', this.baseUrl);
   }
 
   // ===== GET IDENTITAS =====
