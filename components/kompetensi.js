@@ -47,12 +47,26 @@ class KompetensiRenderer {
         </div>
       `;
 
+      // Event listener untuk filter tahun
       const filterSelect = container.querySelector('#tahunFilter');
       if (filterSelect) {
         filterSelect.addEventListener('change', (e) => {
           this.renderRekap(containerId, e.target.value);
         });
       }
+
+      // Event listener untuk tombol lihat sertifikat
+      container.querySelectorAll('.btn-sertifikat').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const link = this.getAttribute('data-link');
+          if (link && link !== '-' && link !== '') {
+            window.open(link, '_blank');
+          } else {
+            alert('Sertifikat belum tersedia untuk pelatihan ini.');
+          }
+        });
+      });
 
     } catch (error) {
       console.error('[KompetensiRenderer] Error:', error);
@@ -69,6 +83,7 @@ class KompetensiRenderer {
     }
   }
 
+  // ===== RENDER STATS =====
   renderStats(statistik) {
     if (!statistik) return '';
 
@@ -95,6 +110,7 @@ class KompetensiRenderer {
     `;
   }
 
+  // ===== RENDER TABLE (DIPERBARUI dengan kolom Sertifikat) =====
   renderTable(data) {
     if (!data || data.length === 0) {
       return `
@@ -105,8 +121,15 @@ class KompetensiRenderer {
       `;
     }
 
-    const headers = ['No', 'Nama Pelatihan', 'Jenis', 'Lembaga', 'Durasi (JP)', 'Nilai', 'Status'];
-    const rows = data.map((item, index) => `
+    // Header tabel dengan tambahan kolom Sertifikat
+    const headers = ['No', 'Nama Pelatihan', 'Jenis', 'Lembaga', 'Durasi (JP)', 'Nilai', 'Status', 'Sertifikat'];
+    
+    const rows = data.map((item, index) => {
+      // Cek link sertifikat dari berbagai kemungkinan nama kolom
+      const linkSertifikat = item.Link_Sertifikat || item.link_sertifikat || item['Link Sertifikat'] || item['link_sertifikat'] || '-';
+      const hasSertifikat = linkSertifikat !== '-' && linkSertifikat !== '' && linkSertifikat !== null && linkSertifikat !== undefined;
+      
+      return `
       <tr>
         <td>${index + 1}</td>
         <td><strong>${item.Nama_Pelatihan || '-'}</strong></td>
@@ -119,8 +142,33 @@ class KompetensiRenderer {
             ${item.Status || 'Proses'}
           </span>
         </td>
+        <td style="text-align: center;">
+          <button 
+            class="btn-sertifikat" 
+            data-link="${linkSertifikat}"
+            style="
+              background: ${hasSertifikat ? 'var(--gradient-primary)' : 'var(--light-gray)'};
+              border: none;
+              border-radius: 50%;
+              width: 36px;
+              height: 36px;
+              cursor: ${hasSertifikat ? 'pointer' : 'not-allowed'};
+              color: ${hasSertifikat ? 'white' : 'var(--gray)'};
+              transition: var(--transition);
+              opacity: ${hasSertifikat ? '1' : '0.5'};
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.9rem;
+            "
+            ${hasSertifikat ? '' : 'disabled'}
+            title="${hasSertifikat ? 'Klik untuk melihat sertifikat' : 'Sertifikat belum tersedia'}"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+        </td>
       </tr>
-    `).join('');
+    `}).join('');
 
     return `
       <table class="rekap-table">
@@ -132,6 +180,7 @@ class KompetensiRenderer {
     `;
   }
 
+  // ===== RENDER FILTER =====
   renderFilter(tahunList) {
     let options = `<option value="all">📅 Semua Tahun</option>`;
     tahunList.forEach(tahun => {
