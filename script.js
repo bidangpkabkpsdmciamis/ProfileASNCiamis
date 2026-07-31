@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   initHeader();
   initScrollTop();
   initMobileToggle();
+  
+  // ===== SETUP TOMBOL EDIT PROFIL =====
+  setupEditButton();
 });
 
 // ============ FUNGSI FORMAT TANGGAL ============
@@ -211,6 +214,54 @@ async function loadIdentitas() {
   }
 }
 
+// ============ SETUP TOMBOL EDIT PROFIL ============
+function setupEditButton() {
+  const editBtn = document.getElementById('editProfileBtn');
+  if (!editBtn) {
+    console.warn('[Profile] Tombol edit tidak ditemukan');
+    return;
+  }
+
+  // Hapus event listener lama (jika ada) dengan clone
+  const newBtn = editBtn.cloneNode(true);
+  editBtn.parentNode.replaceChild(newBtn, editBtn);
+  
+  const btn = document.getElementById('editProfileBtn');
+  
+  btn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    // Cegah double klik
+    if (this.disabled) return;
+    
+    // Nonaktifkan tombol dan tampilkan loading
+    this.disabled = true;
+    const icon = this.querySelector('i');
+    const text = document.getElementById('editBtnText');
+    
+    // Simpan konten asli
+    const originalIcon = icon ? icon.className : 'fas fa-edit';
+    const originalText = text ? text.textContent : 'Edit Profil';
+    
+    // Tampilkan loading
+    if (icon) icon.className = 'fas fa-spinner fa-spin';
+    if (text) text.textContent = 'Memuat...';
+    
+    try {
+      // Panggil fungsi openEditProfile
+      await openEditProfile();
+    } catch (error) {
+      console.error('[EditButton] Error:', error);
+      alert('Gagal membuka form edit: ' + error.message);
+    } finally {
+      // Kembalikan tombol ke keadaan semula
+      this.disabled = false;
+      if (icon) icon.className = originalIcon;
+      if (text) text.textContent = originalText;
+    }
+  });
+}
+
 // ============ FUNGSI BUKA EDIT PROFIL ============
 async function openEditProfile() {
   const isLoggedIn = window.IS_LOGGED_IN || false;
@@ -225,7 +276,7 @@ async function openEditProfile() {
     await editProfile.openEditModal();
   } catch (error) {
     console.error('[EditProfile] Error:', error);
-    alert('Gagal membuka form edit: ' + error.message);
+    throw error;
   }
 }
 
@@ -330,3 +381,4 @@ function initMobileToggle() {
 window.openEditProfile = openEditProfile;
 window.loadIdentitas = loadIdentitas;
 window.updateUserInfo = updateUserInfo;
+window.setupEditButton = setupEditButton;
