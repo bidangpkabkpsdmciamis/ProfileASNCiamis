@@ -8,7 +8,10 @@ class KompetensiRenderer {
   // ===== RENDER REKAP =====
   async renderRekap(containerId, tahun = 'all') {
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+      console.error(`[KompetensiRenderer] Container ${containerId} tidak ditemukan`);
+      return;
+    }
 
     container.innerHTML = `
       <div class="loading">
@@ -21,7 +24,6 @@ class KompetensiRenderer {
       this.currentTahun = tahun;
       const data = await this.api.getRekapKompetensi(tahun);
       
-      // Render statistik
       const statHtml = this.renderStats(data.statistik);
       const tableHtml = this.renderTable(data.data);
       const filterHtml = this.renderFilter(data.statistik.tahunTersedia || []);
@@ -45,7 +47,6 @@ class KompetensiRenderer {
         </div>
       `;
 
-      // Event listener untuk filter tahun
       const filterSelect = container.querySelector('#tahunFilter');
       if (filterSelect) {
         filterSelect.addEventListener('change', (e) => {
@@ -68,7 +69,6 @@ class KompetensiRenderer {
     }
   }
 
-  // ===== RENDER STATS =====
   renderStats(statistik) {
     if (!statistik) return '';
 
@@ -95,7 +95,6 @@ class KompetensiRenderer {
     `;
   }
 
-  // ===== RENDER TABLE =====
   renderTable(data) {
     if (!data || data.length === 0) {
       return `
@@ -116,15 +115,7 @@ class KompetensiRenderer {
         <td>${item.Durasi_Jam || 0}</td>
         <td>${item.Nilai || '-'}</td>
         <td>
-          <span style="
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: ${item.Status === 'Selesai' ? '#10b981' : '#f59e0b'};
-            color: white;
-          ">
+          <span style="display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: ${item.Status === 'Selesai' ? '#10b981' : '#f59e0b'}; color: white;">
             ${item.Status || 'Proses'}
           </span>
         </td>
@@ -134,18 +125,13 @@ class KompetensiRenderer {
     return `
       <table class="rekap-table">
         <thead>
-          <tr>
-            ${headers.map(h => `<th>${h}</th>`).join('')}
-          </tr>
+          <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
         </thead>
-        <tbody>
-          ${rows}
-        </tbody>
+        <tbody>${rows}</tbody>
       </table>
     `;
   }
 
-  // ===== RENDER FILTER =====
   renderFilter(tahunList) {
     let options = `<option value="all">📅 Semua Tahun</option>`;
     tahunList.forEach(tahun => {
@@ -155,9 +141,7 @@ class KompetensiRenderer {
 
     return `
       <label style="font-weight: 600; color: var(--gray);">Filter Tahun:</label>
-      <select id="tahunFilter">
-        ${options}
-      </select>
+      <select id="tahunFilter">${options}</select>
     `;
   }
 }
