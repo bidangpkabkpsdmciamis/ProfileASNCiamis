@@ -1,7 +1,7 @@
 // ============ KONFIGURASI ============
-// Gunakan GAS URL yang sama dengan page login
+// Ganti URL di bawah dengan URL GAS yang sudah Anda deploy
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbz0Gxvtrf5j4gZrKimdMAnde8wmrQiALmdURC65cAsIQJhxicd-xn_2e_8Mp8eV0ZtM6Q/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   NIP: '',
   USER_NAME: 'Guest',
   USER_EMAIL: ''
@@ -66,3 +66,4 @@ window.IS_LOGGED_IN = IS_LOGGED_IN;
 
 console.log('[Profile] IS_LOGGED_IN:', IS_LOGGED_IN);
 console.log('[Profile] CONFIG.NIP:', CONFIG.NIP);
+console.log('[Profile] GAS_URL:', CONFIG.GAS_URL);
