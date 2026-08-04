@@ -22,16 +22,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
   
-  // ===== CEK LOGIN =====
-  const isLoggedIn = window.IS_LOGGED_IN || false;
-  
-  if (!isLoggedIn) {
-    console.log('[Profile] Belum login, menampilkan lock screen');
-    showLockedOverlay();
-    return;
-  }
+// ===== CEK LOGIN =====
+const isLoggedIn = window.IS_LOGGED_IN || false;
 
-  console.log('[Profile] Login confirmed, loading data...');
+if (!isLoggedIn) {
+  console.log('[Profile] ❌ Belum login, menampilkan lock screen');
+  showLockedOverlay();
+  
+  // Cek apakah ada parameter redirect dari URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasRedirect = urlParams.has('loginData');
+  
+  if (!hasRedirect) {
+    console.log('[Profile] 🔄 Tidak ada data login, redirect ke login page');
+    // Redirect ke login dengan return URL
+    const returnUrl = encodeURIComponent(window.location.href);
+    setTimeout(() => {
+      window.location.href = `https://www.singgatera.my.id/login.html?redirect=${returnUrl}`;
+    }, 3000); // Delay 3 detik agar user melihat pesan
+  }
+  return;
+}
+
+console.log('[Profile] ✅ Login confirmed, loading data...');
 
   // ===== UPDATE HEADER =====
   updateUserInfo();
@@ -331,14 +344,22 @@ function initHeader() {
     });
   }
 
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('loginData');
-      window.location.href = 'https://bidangpkabkpsdmciamis.github.io/Singgatera/';
-    });
-  }
+ const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    // Hapus data login dari localStorage
+    localStorage.removeItem('loginData');
+    
+    // Hapus cookie jika ada
+    document.cookie = 'loginData=; path=/; domain=.singgatera.my.id; max-age=0';
+    
+    alert('Anda telah keluar dari sistem.');
+    
+    // Redirect ke home dengan parameter logout
+    window.location.href = 'https://www.singgatera.my.id/?logout=true';
+  });
+}
 }
 
 // ============ INIT SCROLL TOP ============
