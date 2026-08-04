@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       <div style="text-align: center; padding: 80px 20px; font-family: Arial, sans-serif;">
         <h2>⚠️ Error Halaman</h2>
         <p style="color: #666;">Elemen container tidak ditemukan. Pastikan file index.html sudah benar.</p>
-        <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="btn btn-primary" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px;">
+        <a href="https://www.singgatera.my.id/" class="btn btn-primary" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px;">
           Kembali ke Home
         </a>
       </div>
@@ -22,29 +22,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
   
-// ===== CEK LOGIN =====
-const isLoggedIn = window.IS_LOGGED_IN || false;
-
-if (!isLoggedIn) {
-  console.log('[Profile] ❌ Belum login, menampilkan lock screen');
-  showLockedOverlay();
+  // ===== CEK LOGIN =====
+  const isLoggedIn = window.IS_LOGGED_IN || false;
   
-  // Cek apakah ada parameter redirect dari URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const hasRedirect = urlParams.has('loginData');
-  
-  if (!hasRedirect) {
-    console.log('[Profile] 🔄 Tidak ada data login, redirect ke login page');
-    // Redirect ke login dengan return URL
-    const returnUrl = encodeURIComponent(window.location.href);
-    setTimeout(() => {
-      window.location.href = `https://www.singgatera.my.id/login.html?redirect=${returnUrl}`;
-    }, 3000); // Delay 3 detik agar user melihat pesan
+  if (!isLoggedIn) {
+    console.log('[Profile] ❌ Belum login, menampilkan lock screen');
+    showLockedOverlay();
+    
+    // Cek apakah ada parameter redirect dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasRedirect = urlParams.has('loginData');
+    
+    if (!hasRedirect) {
+      console.log('[Profile] 🔄 Tidak ada data login, redirect ke login page');
+      // Redirect ke login dengan return URL
+      const returnUrl = encodeURIComponent(window.location.href);
+      setTimeout(() => {
+        window.location.href = `https://www.singgatera.my.id/login.html?redirect=${returnUrl}`;
+      }, 3000); // Delay 3 detik agar user melihat pesan
+    }
+    return;
   }
-  return;
-}
 
-console.log('[Profile] ✅ Login confirmed, loading data...');
+  console.log('[Profile] ✅ Login confirmed, loading data...');
 
   // ===== UPDATE HEADER =====
   updateUserInfo();
@@ -344,22 +344,27 @@ function initHeader() {
     });
   }
 
- const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    // Hapus data login dari localStorage
-    localStorage.removeItem('loginData');
-    
-    // Hapus cookie jika ada
-    document.cookie = 'loginData=; path=/; domain=.singgatera.my.id; max-age=0';
-    
-    alert('Anda telah keluar dari sistem.');
-    
-    // Redirect ke home dengan parameter logout
-    window.location.href = 'https://www.singgatera.my.id/?logout=true';
-  });
-}
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // ===== HAPUS SEMUA DATA LOGIN =====
+      // Hapus cookie
+      document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
+      // Hapus localStorage
+      localStorage.removeItem('loginData');
+      // Hapus sessionStorage
+      sessionStorage.removeItem('redirectAfterLogin');
+      
+      console.log('[Profile] ✅ Logout: Semua data login dihapus');
+      
+      alert('Anda telah keluar dari sistem.');
+      
+      // Redirect ke home dengan parameter logout
+      window.location.href = 'https://www.singgatera.my.id/?logout=true';
+    });
+  }
 }
 
 // ============ INIT SCROLL TOP ============
