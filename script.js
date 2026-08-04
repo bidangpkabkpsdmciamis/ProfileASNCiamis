@@ -1,9 +1,12 @@
-// ============ MAIN SCRIPT ============
+// ============ SCRIPT.JS - MAIN SCRIPT ============
+// File ini digunakan bersama di semua halaman SINGGATERA
+
 document.addEventListener('DOMContentLoaded', async function() {
   
   console.log('=== PROFILE PAGE START ===');
   console.log('[Profile] IS_LOGGED_IN:', window.IS_LOGGED_IN);
   console.log('[Profile] CONFIG.NIP:', window.CONFIG?.NIP);
+  console.log('[Profile] CONFIG.USER_NAME:', window.CONFIG?.USER_NAME);
   
   // ===== CEK APAKAH ELEMEN ADA =====
   const container = document.getElementById('profileContainer');
@@ -91,6 +94,9 @@ function updateUserInfo() {
   const name = window.CONFIG?.USER_NAME || 'Guest';
   const email = window.CONFIG?.USER_EMAIL || '-';
   
+  console.log('[Profile] updateUserInfo - Name:', name);
+  console.log('[Profile] updateUserInfo - Email:', email);
+  
   if (userNameEl) userNameEl.textContent = name;
   if (dropdownNameEl) dropdownNameEl.textContent = name;
   if (dropdownEmailEl) dropdownEmailEl.textContent = email;
@@ -99,6 +105,8 @@ function updateUserInfo() {
 // ============ SHOW LOCKED OVERLAY ============
 function showLockedOverlay() {
   if (document.getElementById('lockedOverlay')) return;
+  
+  console.log('[Profile] Menampilkan lock screen');
   
   const overlay = document.createElement('div');
   overlay.className = 'locked-overlay';
