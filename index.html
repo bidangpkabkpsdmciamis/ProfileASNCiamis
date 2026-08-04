@@ -6,8 +6,6 @@
   <title>Profil ASN - SINGGATERA</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   
-  <!-- ===== HAPUS document.domain - Browser modern mengabaikannya ===== -->
-  
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -18,7 +16,7 @@
   <!-- ===== HEADER ===== -->
   <header class="header" id="header">
     <div class="container header-container">
-      <a href="https://www.singgatera.my.id/" class="logo">
+      <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="logo">
         <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="BKPSDM Logo" class="logo-img" />
         <div class="logo-text">
           <div class="logo-title">SINGGATERA</div>
@@ -28,8 +26,8 @@
 
       <nav class="nav" id="nav">
         <ul class="nav-links">
-          <li><a href="https://www.singgatera.my.id/" class="nav-link">Home</a></li>
-          <li><a href="https://www.singgatera.my.id/evaluasi.html" class="nav-link">Evaluasi</a></li>
+          <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="nav-link">Home</a></li>
+          <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/evaluasi.html" class="nav-link">Evaluasi</a></li>
           <li><a href="#" class="nav-link active">Profil</a></li>
         </ul>
 
@@ -82,7 +80,7 @@
         <div class="nip" id="profileNip">NIP: -</div>
         <span class="badge" id="profileStatus">ASN</span>
         
-        <!-- ===== TOMBOL EDIT PROFIL ===== -->
+        <!-- ===== TOMBOL EDIT PROFIL (DIPERBAIKI) ===== -->
         <div style="margin-top: 15px;">
           <button id="editProfileBtn" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem; min-width: 140px;">
             <i class="fas fa-edit"></i> <span id="editBtnText">Edit Profil</span>
@@ -145,7 +143,7 @@
         <div class="footer-col footer-links">
           <h4>Link Cepat</h4>
           <ul>
-            <li><a href="https://www.singgatera.my.id/"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/"><i class="fas fa-home"></i> Beranda</a></li>
             <li><a href="#"><i class="fas fa-user-tie"></i> Pelatihan</a></li>
             <li><a href="#"><i class="fas fa-chart-bar"></i> Asesmen</a></li>
             <li><a href="#"><i class="fas fa-graduation-cap"></i> Tugas Belajar</a></li>
@@ -188,8 +186,8 @@
 
       <div class="footer-bottom">
         <div class="copyright">
-          <p>&copy; 2026 <a href="https://www.singgatera.my.id/">PKA BKPSDM Kabupaten Ciamis</a>. All Rights Reserved.</p>
-          <p>Versi 3.0 | Terakhir diperbarui: Agustus 2026</p>
+          <p>&copy; 2026 <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/">PKA BKPSDM Kabupaten Ciamis</a>. All Rights Reserved.</p>
+          <p>Versi 3.0 | Terakhir diperbarui: Juli 2026</p>
         </div>
         <div class="social-links">
           <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -206,21 +204,18 @@
     <i class="fas fa-arrow-up"></i>
   </div>
 
-  <!-- ===== SCRIPTS ===== -->
-  <!-- 1. Config (dengan cookie support) -->
-  <script src="https://www.singgatera.my.id/config.js"></script>
+  <!-- ===== SCRIPTS (URUTAN PENTING) ===== -->
+  <!-- 1. Config dulu -->
+  <script src="config.js"></script>
   
   <!-- 2. Components -->
-  <script src="https://www.singgatera.my.id/components/profile-data.js"></script>
-  <script src="https://www.singgatera.my.id/components/kompetensi.js"></script>
-  <script src="https://www.singgatera.my.id/components/spider-chart.js"></script>
-  <script src="https://www.singgatera.my.id/components/edit-profile.js"></script>
+  <script src="components/profile-data.js"></script>
+  <script src="components/kompetensi.js"></script>
+  <script src="components/spider-chart.js"></script>
+  <script src="components/edit-profile.js"></script>
   
-  <!-- 3. Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  
-  <!-- 4. Main Script -->
-  <script src="https://www.singgatera.my.id/script.js"></script>
+  <!-- 3. Main script terakhir -->
+  <script src="script.js"></script>
   
 </body>
 </html>
