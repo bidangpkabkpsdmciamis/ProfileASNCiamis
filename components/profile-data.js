@@ -38,7 +38,7 @@ class ProfileDataAPI {
     }
   }
 
-  // ===== GET REKAP KOMPETENSI =====
+  // ===== GET REKAP KOMPETENSI (DIPERBARUI) =====
   async getRekapKompetensi(tahun = 'all') {
     if (!this.nip) {
       throw new Error('NIP tidak ditemukan');
@@ -60,6 +60,7 @@ class ProfileDataAPI {
       if (data && data.data) {
         data.data = data.data.map(item => ({
           ...item,
+          // Support berbagai kemungkinan nama kolom
           Link_Sertifikat: item.Link_Sertifikat || item.link_sertifikat || item['Link Sertifikat'] || item['link_sertifikat'] || '-'
         }));
       }
