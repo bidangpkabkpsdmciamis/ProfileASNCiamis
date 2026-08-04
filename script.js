@@ -1,87 +1,5 @@
-// ============ MAIN SCRIPT ============
-document.addEventListener('DOMContentLoaded', async function() {
-  
-  console.log('=== PROFILE PAGE START ===');
-  console.log('[Profile] localStorage loginData:', localStorage.getItem('loginData'));
-  console.log('[Profile] window.CONFIG:', window.CONFIG);
-  console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
-  
-  // ===== CEK APAKAH ELEMEN ADA =====
-  const container = document.getElementById('profileContainer');
-  if (!container) {
-    console.error('[Profile] ERROR: Elemen #profileContainer tidak ditemukan!');
-    document.body.innerHTML = `
-      <div style="text-align: center; padding: 80px 20px; font-family: Arial, sans-serif;">
-        <h2>⚠️ Error Halaman</h2>
-        <p style="color: #666;">Elemen container tidak ditemukan. Pastikan file index.html sudah benar.</p>
-        <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="btn btn-primary" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px;">
-          Kembali ke Home
-        </a>
-      </div>
-    `;
-    return;
-  }
-  
-  // ===== CEK LOGIN =====
-  const isLoggedIn = window.IS_LOGGED_IN || false;
-  
-  if (!isLoggedIn) {
-    console.log('[Profile] Belum login, menampilkan lock screen');
-    showLockedOverlay();
-    return;
-  }
-
-  console.log('[Profile] Login confirmed, loading data...');
-
-  // ===== UPDATE HEADER =====
-  updateUserInfo();
-
-  // ===== LOAD DATA =====
-  try {
-    // 1. Load Identitas
-    await loadIdentitas();
-    
-    // 2. Load Rekap Kompetensi
-    const kompetensiRenderer = new KompetensiRenderer();
-    await kompetensiRenderer.renderRekap('rekapContainer');
-    
-    // 3. Load Spider Chart
-    const spiderChart = new SpiderChart('spiderChart');
-    await spiderChart.loadData();
-    
-  } catch (error) {
-    console.error('[Profile] Error:', error);
-    showError(error.message);
-  }
-
-  // ===== INIT COMPONENTS =====
-  initHeader();
-  initScrollTop();
-  initMobileToggle();
-  
-  // ===== SETUP TOMBOL EDIT PROFIL =====
-  setupEditButton();
-});
-
-// ============ FUNGSI FORMAT TANGGAL ============
-function formatDate(dateValue) {
-  if (!dateValue || dateValue === '-' || dateValue === '') return '-';
-  
-  try {
-    const date = new Date(dateValue);
-    if (isNaN(date.getTime())) {
-      return dateValue;
-    }
-    const options = { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    };
-    return date.toLocaleDateString('id-ID', options);
-  } catch (e) {
-    return dateValue;
-  }
-}
+// ============ SCRIPT.JS - MAIN SCRIPT ============
+// File ini digunakan bersama di semua halaman SINGGATERA
 
 // ============ UPDATE USER INFO ============
 function updateUserInfo() {
@@ -89,6 +7,7 @@ function updateUserInfo() {
   const dropdownNameEl = document.getElementById('dropdownName');
   const dropdownEmailEl = document.getElementById('dropdownEmail');
   
+  // Gunakan CONFIG yang sudah di-set oleh checkLoginStatus()
   const name = window.CONFIG?.USER_NAME || 'Guest';
   const email = window.CONFIG?.USER_EMAIL || '-';
   
@@ -97,207 +16,9 @@ function updateUserInfo() {
   if (dropdownEmailEl) dropdownEmailEl.textContent = email;
 }
 
-// ============ SHOW LOCKED OVERLAY ============
-function showLockedOverlay() {
-  if (document.getElementById('lockedOverlay')) return;
-  
-  const overlay = document.createElement('div');
-  overlay.className = 'locked-overlay';
-  overlay.id = 'lockedOverlay';
-  overlay.innerHTML = `
-    <div class="locked-content">
-      <div class="lock-icon">
-        <i class="fas fa-lock"></i>
-      </div>
-      <h2>🔒 Akses Terbatas</h2>
-      <p>
-        Halaman Profil hanya dapat diakses oleh ASN yang sudah login.
-        Silakan login terlebih dahulu untuk melihat data profil Anda.
-      </p>
-      <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-        <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="btn btn-primary">
-          <i class="fas fa-home"></i> Kembali ke Home
-        </a>
-        <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/login.html" class="btn btn-secondary">
-          <i class="fas fa-sign-in-alt"></i> Login
-        </a>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-  
-  const container = document.getElementById('profileContainer');
-  if (container) {
-    container.style.filter = 'blur(8px)';
-    container.style.pointerEvents = 'none';
-  }
-}
-
-// ============ LOAD IDENTITAS ============
-async function loadIdentitas() {
-  const container = document.getElementById('identitasContainer');
-  if (!container) {
-    console.error('[Profile] Elemen #identitasContainer tidak ditemukan');
-    return;
-  }
-
-  try {
-    const api = new ProfileDataAPI();
-    const data = await api.getIdentitas();
-
-    if (!data) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 30px; color: var(--gray);">
-          <p>Data identitas tidak ditemukan untuk NIP: ${window.CONFIG?.NIP || '-'}</p>
-        </div>
-      `;
-      return;
-    }
-
-    // Update header
-    const avatarEl = document.querySelector('.profile-avatar');
-    if (avatarEl) avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
-    
-    const nameEl = document.getElementById('profileName');
-    if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
-    
-    const nipEl = document.getElementById('profileNip');
-    if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
-    
-    const badgeEl = document.getElementById('profileStatus');
-    if (badgeEl) {
-      badgeEl.textContent = data.Status_ASN || 'ASN';
-      if (data.Status_ASN === 'PNS') {
-        badgeEl.classList.add('gold');
-      }
-    }
-
-    // Format tanggal
-    const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
-    const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
-
-    const fields = [
-      { label: 'Nama', value: data.Nama },
-      { label: 'NIP', value: data.NIP },
-      { label: 'Status ASN', value: data.Status_ASN },
-      { label: 'Pangkat / Golongan', value: `${data.Pangkat || ''} / ${data.Golongan_Ruang || ''}` },
-      { label: 'Email', value: data.Email },
-      { label: 'No HP', value: data.No_HP },
-      { label: 'Tempat, Tanggal Lahir', value: `${data.Tempat_Lahir || ''}, ${formattedTanggalLahir}` },
-      { label: 'Jenis Kelamin', value: data.Jenis_Kelamin },
-      { label: 'Agama', value: data.Agama },
-      { label: 'Alamat', value: data.Alamat },
-      { label: 'Unit Kerja', value: data.Unit_Kerja },
-      { label: 'Jabatan', value: data.Jabatan },
-      { label: 'TMT Jabatan', value: formattedTMTJabatan },
-      { label: 'Pendidikan Terakhir', value: data.Pendidikan_Terakhir },
-      { label: 'Tahun Lulus', value: data.Tahun_Lulus }
-    ];
-
-    container.innerHTML = fields.map(field => `
-      <div class="identitas-item">
-        <span class="label">${field.label}</span>
-        <span class="value">${field.value || '-'}</span>
-      </div>
-    `).join('');
-
-  } catch (error) {
-    console.error('[Profile] Error loadIdentitas:', error);
-    container.innerHTML = `
-      <div style="text-align: center; padding: 30px; color: var(--danger);">
-        <p>Gagal memuat data identitas: ${error.message}</p>
-        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">
-          <i class="fas fa-sync"></i> Coba Lagi
-        </button>
-      </div>
-    `;
-  }
-}
-
-// ============ SETUP TOMBOL EDIT PROFIL ============
-function setupEditButton() {
-  const editBtn = document.getElementById('editProfileBtn');
-  if (!editBtn) {
-    console.warn('[Profile] Tombol edit tidak ditemukan');
-    return;
-  }
-
-  // Hapus event listener lama (jika ada) dengan clone
-  const newBtn = editBtn.cloneNode(true);
-  editBtn.parentNode.replaceChild(newBtn, editBtn);
-  
-  const btn = document.getElementById('editProfileBtn');
-  
-  btn.addEventListener('click', async function(e) {
-    e.preventDefault();
-    
-    // Cegah double klik
-    if (this.disabled) return;
-    
-    // Nonaktifkan tombol dan tampilkan loading
-    this.disabled = true;
-    const icon = this.querySelector('i');
-    const text = document.getElementById('editBtnText');
-    
-    // Simpan konten asli
-    const originalIcon = icon ? icon.className : 'fas fa-edit';
-    const originalText = text ? text.textContent : 'Edit Profil';
-    
-    // Tampilkan loading
-    if (icon) icon.className = 'fas fa-spinner fa-spin';
-    if (text) text.textContent = 'Memuat...';
-    
-    try {
-      // Panggil fungsi openEditProfile
-      await openEditProfile();
-    } catch (error) {
-      console.error('[EditButton] Error:', error);
-      alert('Gagal membuka form edit: ' + error.message);
-    } finally {
-      // Kembalikan tombol ke keadaan semula
-      this.disabled = false;
-      if (icon) icon.className = originalIcon;
-      if (text) text.textContent = originalText;
-    }
-  });
-}
-
-// ============ FUNGSI BUKA EDIT PROFIL ============
-async function openEditProfile() {
-  const isLoggedIn = window.IS_LOGGED_IN || false;
-  
-  if (!isLoggedIn) {
-    alert('Silakan login terlebih dahulu untuk mengedit profil.');
-    return;
-  }
-  
-  try {
-    const editProfile = new EditProfile();
-    await editProfile.openEditModal();
-  } catch (error) {
-    console.error('[EditProfile] Error:', error);
-    throw error;
-  }
-}
-
-// ============ SHOW ERROR ============
-function showError(message) {
-  const container = document.getElementById('profileContainer');
-  if (!container) {
-    console.error('[Profile] Elemen #profileContainer tidak ditemukan');
-    return;
-  }
-  
-  container.innerHTML = `
-    <div style="text-align: center; padding: 80px 20px;">
-      <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
-      <h2>Gagal Memuat Profil</h2>
-      <p style="color: var(--gray);">${message}</p>
-      <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
-        <i class="fas fa-sync"></i> Refresh
-      </button>
-    </div>
-  `;
+// ============ CEK LOGIN STATUS ============
+function isUserLoggedIn() {
+  return window.IS_LOGGED_IN || false;
 }
 
 // ============ INIT HEADER ============
@@ -313,6 +34,7 @@ function initHeader() {
     });
   }
 
+  // ===== USER DROPDOWN =====
   const userBtn = document.getElementById('userBtn');
   const userDropdown = document.getElementById('userDropdown');
   
@@ -327,32 +49,24 @@ function initHeader() {
     });
   }
 
+  // ===== LOGOUT =====
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
+    logoutBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      localStorage.removeItem('loginData');
-      window.location.href = 'https://bidangpkabkpsdmciamis.github.io/Singgatera/';
+      
+      // Gunakan fungsi logout global dari config.js
+      if (typeof window.logout === 'function') {
+        window.logout();
+      } else {
+        // Fallback manual
+        localStorage.removeItem('loginData');
+        sessionStorage.removeItem('loginData');
+        document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
+        window.location.href = 'https://www.singgatera.my.id/';
+      }
     });
   }
-}
-
-// ============ INIT SCROLL TOP ============
-function initScrollTop() {
-  const scrollTopBtn = document.getElementById('scrollTop');
-  if (!scrollTopBtn) return;
-  
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 500) {
-      scrollTopBtn.classList.add('active');
-    } else {
-      scrollTopBtn.classList.remove('active');
-    }
-  });
-
-  scrollTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
 }
 
 // ============ INIT MOBILE TOGGLE ============
@@ -377,8 +91,195 @@ function initMobileToggle() {
   });
 }
 
+// ============ INIT SCROLL TOP ============
+function initScrollTop() {
+  const scrollTopBtn = document.getElementById('scrollTop');
+  if (!scrollTopBtn) return;
+  
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+      scrollTopBtn.classList.add('active');
+    } else {
+      scrollTopBtn.classList.remove('active');
+    }
+  });
+
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// ============ SHOW LOCKED OVERLAY ============
+function showLockedOverlay() {
+  if (document.getElementById('lockedOverlay')) return;
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'locked-overlay';
+  overlay.id = 'lockedOverlay';
+  overlay.innerHTML = `
+    <div class="locked-content">
+      <div class="lock-icon">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2>🔒 Akses Terbatas</h2>
+      <p>
+        Halaman ini hanya dapat diakses oleh ASN yang sudah login.
+        Silakan login terlebih dahulu untuk mengakses halaman ini.
+      </p>
+      <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <a href="https://www.singgatera.my.id/" class="btn btn-primary">
+          <i class="fas fa-home"></i> Kembali ke Home
+        </a>
+        <a href="https://www.singgatera.my.id/login.html" class="btn btn-secondary">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  // Blur content di belakang overlay
+  const containers = document.querySelectorAll('.container, .profile-container, .main-container');
+  containers.forEach(el => {
+    el.style.filter = 'blur(8px)';
+    el.style.pointerEvents = 'none';
+  });
+}
+
+// ============ HIDE LOCKED OVERLAY ============
+function hideLockedOverlay() {
+  const overlay = document.getElementById('lockedOverlay');
+  if (overlay) {
+    overlay.remove();
+  }
+  
+  const containers = document.querySelectorAll('.container, .profile-container, .main-container');
+  containers.forEach(el => {
+    el.style.filter = 'none';
+    el.style.pointerEvents = 'auto';
+  });
+}
+
+// ============ PROTECT PAGE ============
+function protectPage() {
+  const isLoggedIn = window.IS_LOGGED_IN || false;
+  
+  if (!isLoggedIn) {
+    console.log('[Protect] User belum login, menampilkan lock screen');
+    showLockedOverlay();
+    return false;
+  }
+  
+  console.log('[Protect] User sudah login');
+  hideLockedOverlay();
+  updateUserInfo();
+  return true;
+}
+
+// ============ FORMAT TANGGAL ============
+function formatDate(dateValue) {
+  if (!dateValue || dateValue === '-' || dateValue === '') return '-';
+  
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
+      return dateValue;
+    }
+    const options = { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    };
+    return date.toLocaleDateString('id-ID', options);
+  } catch (e) {
+    return dateValue;
+  }
+}
+
+// ============ SHOW ERROR ============
+function showError(message, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error('[Error] Container tidak ditemukan');
+    return;
+  }
+  
+  container.innerHTML = `
+    <div style="text-align: center; padding: 80px 20px;">
+      <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
+      <h2>Gagal Memuat Data</h2>
+      <p style="color: var(--gray);">${message}</p>
+      <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
+        <i class="fas fa-sync"></i> Refresh
+      </button>
+    </div>
+  `;
+}
+
+// ============ SHOW LOADING ============
+function showLoading(containerId, message = 'Memuat data...') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>${message}</p>
+    </div>
+  `;
+}
+
+// ============ GET QUERY PARAMETER ============
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+// ============ REDIRECT IF NOT LOGGED IN ============
+function redirectIfNotLoggedIn(redirectUrl = 'https://www.singgatera.my.id/login.html') {
+  if (!window.IS_LOGGED_IN) {
+    const currentUrl = encodeURIComponent(window.location.href);
+    window.location.href = `${redirectUrl}?redirect=${currentUrl}`;
+    return true;
+  }
+  return false;
+}
+
+// ============ CHECK AUTH STATUS ============
+function checkAuthAndRedirect() {
+  const isLoggedIn = window.IS_LOGGED_IN || false;
+  
+  if (!isLoggedIn) {
+    // Coba refresh data dari cookie
+    if (typeof window.checkLoginStatus === 'function') {
+      const refreshed = window.checkLoginStatus();
+      if (refreshed) {
+        updateUserInfo();
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  updateUserInfo();
+  return true;
+}
+
 // ============ EXPORT KE GLOBAL ============
-window.openEditProfile = openEditProfile;
-window.loadIdentitas = loadIdentitas;
 window.updateUserInfo = updateUserInfo;
-window.setupEditButton = setupEditButton;
+window.isUserLoggedIn = isUserLoggedIn;
+window.initHeader = initHeader;
+window.initMobileToggle = initMobileToggle;
+window.initScrollTop = initScrollTop;
+window.showLockedOverlay = showLockedOverlay;
+window.hideLockedOverlay = hideLockedOverlay;
+window.protectPage = protectPage;
+window.formatDate = formatDate;
+window.showError = showError;
+window.showLoading = showLoading;
+window.getQueryParam = getQueryParam;
+window.redirectIfNotLoggedIn = redirectIfNotLoggedIn;
+window.checkAuthAndRedirect = checkAuthAndRedirect;
+
+console.log('[Script.js] Loaded successfully');
+console.log('[Script.js] IS_LOGGED_IN:', window.IS_LOGGED_IN);
