@@ -1,176 +1,116 @@
 // ============ KONFIGURASI ============
 const CONFIG = {
+  // GAS URL untuk READ (membaca data)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
+  
+  // GAS URL untuk WRITE (menyimpan data)
   GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxgrroFCX-rj3XutVILU25gSLIqoocgb93iSfdeSGfjcLqDYabFnvbfRPr0Cb2GiZPNLg/exec',
+  
   NIP: '',
   USER_NAME: 'Guest',
-  USER_EMAIL: '',
-  DOMAIN: '.singgatera.my.id'
+  USER_EMAIL: ''
 };
 
-// ============ COOKIE UTILITY ============
-function setAuthCookie(userData, days = 1) {
-  try {
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-    const value = encodeURIComponent(JSON.stringify(userData));
-    document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=${CONFIG.DOMAIN}; SameSite=Lax`;
-    console.log('[Cookie] Set cookie:', document.cookie);
-  } catch (e) {
-    console.error('[Cookie] Error setting cookie:', e);
-  }
-}
-
-function getAuthCookie() {
-  try {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const trimmed = cookie.trim();
-      if (trimmed.startsWith('loginData=')) {
-        const value = trimmed.substring('loginData='.length);
-        const decoded = decodeURIComponent(value);
-        return JSON.parse(decoded);
-      }
-    }
-  } catch (e) {
-    console.error('[Cookie] Error reading cookie:', e);
-  }
-  return null;
-}
-
-function deleteAuthCookie() {
-  document.cookie = `loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${CONFIG.DOMAIN};`;
-}
-
-// ============ CEK LOGIN - PRIORITAS: localStorage → cookie ============
+// ============ FUNGSI CEK LOGIN ============
 function checkLoginStatus() {
-  console.log('[Auth] ===== CHECKING LOGIN STATUS =====');
-  console.log('[Auth] Current URL:', window.location.href);
-  console.log('[Auth] Document.domain:', document.domain);
-  console.log('[Auth] All cookies:', document.cookie);
-  
   try {
-    // ===== 1. CEK DARI localStorage (PRIORITAS UTAMA) =====
-    let userData = null;
-    const localData = localStorage.getItem('loginData');
-    console.log('[Auth] localStorage loginData:', localData);
+    // ===== STEP 1: CEK URL PARAMETER (dari redirect login) =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginDataParam = urlParams.get('loginData');
     
-    if (localData) {
+    if (loginDataParam) {
+      console.log('[Profile] ✅ Login data ditemukan di URL parameter');
       try {
-        userData = JSON.parse(localData);
-        console.log('[Auth] Found userData in localStorage:', userData);
+        const loginData = JSON.parse(decodeURIComponent(loginDataParam));
+        console.log('[Profile] Data login dari URL:', loginData);
+        
+        // Simpan ke localStorage
+        localStorage.setItem('loginData', JSON.stringify(loginData));
+        console.log('[Profile] ✅ Data login tersimpan ke localStorage');
+        
+        // Hapus parameter dari URL (bersihkan URL)
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        console.log('[Profile] ✅ URL parameter dihapus');
+        
+        // Set CONFIG
+        CONFIG.NIP = loginData.username || '';
+        CONFIG.USER_NAME = loginData.name || 'Guest';
+        CONFIG.USER_EMAIL = loginData.email || '';
+        
+        console.log('[Profile] ✅ Login valid dari URL! NIP:', CONFIG.NIP);
+        return true;
       } catch (e) {
-        console.error('[Auth] Error parsing localStorage:', e);
+        console.error('[Profile] ❌ Gagal parse login data dari URL:', e);
       }
     }
     
-    // ===== 2. CEK DARI COOKIE (fallback) =====
-    if (!userData) {
-      userData = getAuthCookie();
-      if (userData) {
-        console.log('[Auth] Found userData in cookie:', userData);
-        // Sync ke localStorage
-        localStorage.setItem('loginData', JSON.stringify(userData));
-      }
-    }
+    // ===== STEP 2: CEK LOCALSTORAGE =====
+    const loginData = localStorage.getItem('loginData');
     
-    // ===== 3. CEK DARI QUERY PARAMETER (redirect dari login) =====
-    if (!userData) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-      if (token) {
-        try {
-          userData = JSON.parse(decodeURIComponent(token));
-          console.log('[Auth] Found userData in query param:', userData);
-          // Simpan ke localStorage dan cookie
-          localStorage.setItem('loginData', JSON.stringify(userData));
-          setAuthCookie(userData);
-        } catch (e) {
-          console.error('[Auth] Error parsing token:', e);
-        }
-      }
-    }
-    
-    // ===== 4. CEK DARI sessionStorage =====
-    if (!userData) {
-      const sessionData = sessionStorage.getItem('loginData');
-      if (sessionData) {
-        try {
-          userData = JSON.parse(sessionData);
-          console.log('[Auth] Found userData in sessionStorage:', userData);
-          localStorage.setItem('loginData', JSON.stringify(userData));
-        } catch (e) {
-          console.error('[Auth] Error parsing sessionStorage:', e);
-        }
-      }
-    }
-    
-    // ===== VALIDASI DATA =====
-    if (!userData) {
-      console.log('[Auth] ❌ No login data found');
+    if (!loginData) {
+      console.log('[Profile] ❌ Tidak ada data login di localStorage');
       return false;
     }
     
-    const nip = userData.username || userData.nip || '';
+    const userData = JSON.parse(loginData);
+    console.log('[Profile] Data login dari localStorage:', userData);
+    
+    // Ambil NIP dari field username (sesuai dengan login page)
+    const nip = userData.username || '';
     const name = userData.name || 'Guest';
     
     if (!nip) {
-      console.log('[Auth] ❌ NIP not found in data');
+      console.log('[Profile] ❌ NIP tidak ditemukan di data login');
       return false;
     }
     
-    // Cek expired (24 jam)
+    // ===== STEP 3: CEK MASA BERLAKU LOGIN (sama hari) =====
     const loginTime = new Date(userData.loginTime);
     const currentTime = new Date();
-    const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
+    const isSameDay = 
+      loginTime.getDate() === currentTime.getDate() &&
+      loginTime.getMonth() === currentTime.getMonth() &&
+      loginTime.getFullYear() === currentTime.getFullYear();
     
-    if (hoursDiff > 24) {
-      console.log('[Auth] ❌ Login expired (', hoursDiff.toFixed(1), 'hours ago)');
-      deleteAuthCookie();
+    if (!isSameDay) {
+      console.log('[Profile] ⚠️ Login sudah kadaluarsa (beda hari)');
       localStorage.removeItem('loginData');
-      sessionStorage.removeItem('loginData');
       return false;
     }
     
-    // ===== LOGIN VALID =====
+    // ===== STEP 4: SET DATA KE CONFIG =====
     CONFIG.NIP = nip;
     CONFIG.USER_NAME = name;
     CONFIG.USER_EMAIL = userData.email || '';
     
-    console.log('[Auth] ✅ Login VALID!');
-    console.log('[Auth] NIP:', CONFIG.NIP);
-    console.log('[Auth] Name:', CONFIG.USER_NAME);
-    console.log('[Auth] Email:', CONFIG.USER_EMAIL);
-    console.log('[Auth] Hours since login:', hoursDiff.toFixed(1));
-    
+    console.log('[Profile] ✅ Login valid dari localStorage! NIP:', CONFIG.NIP);
     return true;
     
   } catch (error) {
-    console.error('[Auth] ❌ Error in checkLoginStatus:', error);
+    console.error('[Profile] ❌ Error checkLoginStatus:', error);
     return false;
   }
 }
 
-// ============ LOGOUT ============
-function logout() {
-  console.log('[Auth] Logging out...');
-  deleteAuthCookie();
-  localStorage.removeItem('loginData');
-  sessionStorage.removeItem('loginData');
-  window.location.href = 'https://www.singgatera.my.id/';
+// ============ FUNGSI REDIRECT KE LOGIN (jika belum login) ============
+function redirectToLogin() {
+  const currentUrl = window.location.href;
+  const encodedRedirect = encodeURIComponent(currentUrl);
+  window.location.href = `https://www.singgatera.my.id/login.html?redirect=${encodedRedirect}`;
 }
 
 // ============ EKSEKUSI ============
 const IS_LOGGED_IN = checkLoginStatus();
 
-// Export ke window
+// EKSPORT ke window
 window.CONFIG = CONFIG;
 window.IS_LOGGED_IN = IS_LOGGED_IN;
-window.setAuthCookie = setAuthCookie;
-window.getAuthCookie = getAuthCookie;
-window.deleteAuthCookie = deleteAuthCookie;
-window.logout = logout;
+window.redirectToLogin = redirectToLogin;
 
-console.log('[Auth] ===== FINAL RESULT =====');
-console.log('[Auth] IS_LOGGED_IN:', IS_LOGGED_IN);
-console.log('[Auth] CONFIG.NIP:', CONFIG.NIP);
-console.log('[Auth] CONFIG.USER_NAME:', CONFIG.USER_NAME);
+console.log('[Profile] ========== STATUS ==========');
+console.log('[Profile] IS_LOGGED_IN:', IS_LOGGED_IN);
+console.log('[Profile] CONFIG.NIP:', CONFIG.NIP);
+console.log('[Profile] CONFIG.USER_NAME:', CONFIG.USER_NAME);
+console.log('[Profile] GAS_URL:', CONFIG.GAS_URL);
+console.log('[Profile] =============================');
