@@ -4,19 +4,426 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profil ASN - SINGGATERA</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" type="image/png" href="https://www.singgatera.my.id/favicon.png" />
+  
+  <!-- ===== SET DOCUMENT DOMAIN UNTUK COOKIE ===== -->
+  <script>
+    document.domain = 'singgatera.my.id';
+  </script>
   
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://www.singgatera.my.id/style.css" />
+  
+  <style>
+    /* ===== STYLE TAMBAHAN KHUSUS PROFILE ===== */
+    .profile-container {
+      padding: 120px 20px 80px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .profile-header {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .profile-info h1 {
+      font-size: 2rem;
+      color: var(--dark-blue);
+      margin-bottom: 5px;
+    }
+
+    .profile-info .nip {
+      color: var(--gray);
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .profile-info .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .profile-info .badge.gold {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 992px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 30px;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--light-gray);
+    }
+
+    .card-header h2 {
+      font-size: 1.3rem;
+      color: var(--dark-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header .badge-count {
+      background: var(--light-gray);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gray);
+    }
+
+    .identitas-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 30px;
+    }
+
+    @media (max-width: 768px) {
+      .identitas-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .identitas-item {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .identitas-item .label {
+      font-size: 0.8rem;
+      color: var(--gray);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .identitas-item .value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .rekap-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: var(--light-gray);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-box .number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-box .label {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    .rekap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .rekap-table th {
+      background: var(--light-gray);
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .rekap-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .rekap-table tr:hover {
+      background: var(--light);
+    }
+
+    .tahun-filter {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tahun-filter select {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--light-gray);
+      font-size: 0.9rem;
+      background: white;
+      cursor: pointer;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 350px;
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--gray);
+    }
+
+    .loading .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--light-gray);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== LOCKED OVERLAY ===== */
+    .locked-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .locked-content {
+      background: white;
+      border-radius: var(--border-radius-lg);
+      padding: 60px 50px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .locked-content .lock-icon {
+      font-size: 4rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .locked-content h2 {
+      font-size: 2rem;
+      color: var(--dark-blue);
+      margin-bottom: 15px;
+    }
+
+    .locked-content p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 30px;
+      line-height: 1.7;
+    }
+
+    .locked-content .btn {
+      margin: 5px;
+    }
+
+    .locked-content .btn-secondary {
+      border-color: var(--gray);
+      color: var(--gray);
+    }
+
+    .locked-content .btn-secondary:hover {
+      background: var(--gray);
+      color: white;
+      border-color: var(--gray);
+    }
+
+    /* ===== SERTIFIKAT BUTTON ===== */
+    .btn-sertifikat {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      color: white;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .btn-sertifikat:hover:not(:disabled) {
+      transform: scale(1.15);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-sertifikat:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-sertifikat:disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 20px;
+      }
+
+      .profile-container {
+        padding: 100px 15px 60px;
+      }
+
+      .locked-content {
+        padding: 40px 25px;
+      }
+
+      .rekap-table {
+        font-size: 0.75rem;
+      }
+      
+      .rekap-table th,
+      .rekap-table td {
+        padding: 6px 8px;
+      }
+      
+      .btn-sertifikat {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ===== SCROLL TOP ===== */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: var(--gradient-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: var(--transition);
+      z-index: 999;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .scroll-top.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
 <body>
 
   <!-- ===== HEADER ===== -->
   <header class="header" id="header">
     <div class="container header-container">
-      <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="logo">
+      <a href="https://www.singgatera.my.id/" class="logo">
         <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="BKPSDM Logo" class="logo-img" />
         <div class="logo-text">
           <div class="logo-title">SINGGATERA</div>
@@ -26,8 +433,8 @@
 
       <nav class="nav" id="nav">
         <ul class="nav-links">
-          <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/" class="nav-link">Home</a></li>
-          <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/evaluasi.html" class="nav-link">Evaluasi</a></li>
+          <li><a href="https://www.singgatera.my.id/" class="nav-link">Home</a></li>
+          <li><a href="https://www.singgatera.my.id/evaluasi.html" class="nav-link">Evaluasi</a></li>
           <li><a href="#" class="nav-link active">Profil</a></li>
         </ul>
 
@@ -80,7 +487,6 @@
         <div class="nip" id="profileNip">NIP: -</div>
         <span class="badge" id="profileStatus">ASN</span>
         
-        <!-- ===== TOMBOL EDIT PROFIL (DIPERBAIKI) ===== -->
         <div style="margin-top: 15px;">
           <button id="editProfileBtn" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem; min-width: 140px;">
             <i class="fas fa-edit"></i> <span id="editBtnText">Edit Profil</span>
@@ -143,7 +549,7 @@
         <div class="footer-col footer-links">
           <h4>Link Cepat</h4>
           <ul>
-            <li><a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="https://www.singgatera.my.id/"><i class="fas fa-home"></i> Beranda</a></li>
             <li><a href="#"><i class="fas fa-user-tie"></i> Pelatihan</a></li>
             <li><a href="#"><i class="fas fa-chart-bar"></i> Asesmen</a></li>
             <li><a href="#"><i class="fas fa-graduation-cap"></i> Tugas Belajar</a></li>
@@ -186,8 +592,8 @@
 
       <div class="footer-bottom">
         <div class="copyright">
-          <p>&copy; 2026 <a href="https://bidangpkabkpsdmciamis.github.io/Singgatera/">PKA BKPSDM Kabupaten Ciamis</a>. All Rights Reserved.</p>
-          <p>Versi 3.0 | Terakhir diperbarui: Juli 2026</p>
+          <p>&copy; 2026 <a href="https://www.singgatera.my.id/">PKA BKPSDM Kabupaten Ciamis</a>. All Rights Reserved.</p>
+          <p>Versi 3.0 | Terakhir diperbarui: Agustus 2026</p>
         </div>
         <div class="social-links">
           <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -204,18 +610,406 @@
     <i class="fas fa-arrow-up"></i>
   </div>
 
-  <!-- ===== SCRIPTS (URUTAN PENTING) ===== -->
-  <!-- 1. Config dulu -->
-  <script src="config.js"></script>
+  <!-- ===== SCRIPTS ===== -->
+  <!-- 1. Config (dengan cookie support) -->
+  <script src="https://www.singgatera.my.id/config.js"></script>
   
   <!-- 2. Components -->
-  <script src="components/profile-data.js"></script>
-  <script src="components/kompetensi.js"></script>
-  <script src="components/spider-chart.js"></script>
-  <script src="components/edit-profile.js"></script>
+  <script src="https://www.singgatera.my.id/components/profile-data.js"></script>
+  <script src="https://www.singgatera.my.id/components/kompetensi.js"></script>
+  <script src="https://www.singgatera.my.id/components/spider-chart.js"></script>
+  <script src="https://www.singgatera.my.id/components/edit-profile.js"></script>
   
-  <!-- 3. Main script terakhir -->
-  <script src="script.js"></script>
+  <!-- 3. Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   
+  <!-- 4. Main Script -->
+  <script>
+    // ============ MAIN SCRIPT ============
+    document.addEventListener('DOMContentLoaded', async function() {
+      
+      console.log('=== PROFILE PAGE START ===');
+      console.log('[Profile] IS_LOGGED_IN:', window.IS_LOGGED_IN);
+      console.log('[Profile] CONFIG.NIP:', window.CONFIG?.NIP);
+      
+      // ===== CEK APAKAH ELEMEN ADA =====
+      const container = document.getElementById('profileContainer');
+      if (!container) {
+        console.error('[Profile] ERROR: Elemen #profileContainer tidak ditemukan!');
+        document.body.innerHTML = `
+          <div style="text-align: center; padding: 80px 20px; font-family: Arial, sans-serif;">
+            <h2>⚠️ Error Halaman</h2>
+            <p style="color: #666;">Elemen container tidak ditemukan.</p>
+            <a href="https://www.singgatera.my.id/" class="btn btn-primary" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px;">
+              Kembali ke Home
+            </a>
+          </div>
+        `;
+        return;
+      }
+      
+      // ===== CEK LOGIN =====
+      const isLoggedIn = window.IS_LOGGED_IN || false;
+      
+      if (!isLoggedIn) {
+        console.log('[Profile] Belum login, menampilkan lock screen');
+        showLockedOverlay();
+        return;
+      }
+
+      console.log('[Profile] Login confirmed, loading data...');
+
+      // ===== UPDATE HEADER =====
+      updateUserInfo();
+
+      // ===== LOAD DATA =====
+      try {
+        // 1. Load Identitas
+        await loadIdentitas();
+        
+        // 2. Load Rekap Kompetensi
+        const kompetensiRenderer = new KompetensiRenderer();
+        await kompetensiRenderer.renderRekap('rekapContainer');
+        
+        // 3. Load Spider Chart
+        const spiderChart = new SpiderChart('spiderChart');
+        await spiderChart.loadData();
+        
+      } catch (error) {
+        console.error('[Profile] Error:', error);
+        showError(error.message);
+      }
+
+      // ===== INIT COMPONENTS =====
+      initHeader();
+      initScrollTop();
+      initMobileToggle();
+      
+      // ===== SETUP TOMBOL EDIT PROFIL =====
+      setupEditButton();
+    });
+
+    // ============ FUNGSI FORMAT TANGGAL ============
+    function formatDate(dateValue) {
+      if (!dateValue || dateValue === '-' || dateValue === '') return '-';
+      
+      try {
+        const date = new Date(dateValue);
+        if (isNaN(date.getTime())) {
+          return dateValue;
+        }
+        const options = { 
+          day: 'numeric', 
+          month: 'long', 
+          year: 'numeric' 
+        };
+        return date.toLocaleDateString('id-ID', options);
+      } catch (e) {
+        return dateValue;
+      }
+    }
+
+    // ============ UPDATE USER INFO ============
+    function updateUserInfo() {
+      const userNameEl = document.getElementById('userName');
+      const dropdownNameEl = document.getElementById('dropdownName');
+      const dropdownEmailEl = document.getElementById('dropdownEmail');
+      
+      const name = window.CONFIG?.USER_NAME || 'Guest';
+      const email = window.CONFIG?.USER_EMAIL || '-';
+      
+      if (userNameEl) userNameEl.textContent = name;
+      if (dropdownNameEl) dropdownNameEl.textContent = name;
+      if (dropdownEmailEl) dropdownEmailEl.textContent = email;
+    }
+
+    // ============ SHOW LOCKED OVERLAY ============
+    function showLockedOverlay() {
+      if (document.getElementById('lockedOverlay')) return;
+      
+      const overlay = document.createElement('div');
+      overlay.className = 'locked-overlay';
+      overlay.id = 'lockedOverlay';
+      overlay.innerHTML = `
+        <div class="locked-content">
+          <div class="lock-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h2>🔒 Akses Terbatas</h2>
+          <p>
+            Halaman Profil hanya dapat diakses oleh ASN yang sudah login.
+            Silakan login terlebih dahulu untuk melihat data profil Anda.
+          </p>
+          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="https://www.singgatera.my.id/" class="btn btn-primary">
+              <i class="fas fa-home"></i> Kembali ke Home
+            </a>
+            <a href="https://www.singgatera.my.id/login.html" class="btn btn-secondary">
+              <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const container = document.getElementById('profileContainer');
+      if (container) {
+        container.style.filter = 'blur(8px)';
+        container.style.pointerEvents = 'none';
+      }
+    }
+
+    // ============ LOAD IDENTITAS ============
+    async function loadIdentitas() {
+      const container = document.getElementById('identitasContainer');
+      if (!container) {
+        console.error('[Profile] Elemen #identitasContainer tidak ditemukan');
+        return;
+      }
+
+      try {
+        const api = new ProfileDataAPI();
+        const data = await api.getIdentitas();
+
+        if (!data) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--gray);">
+              <p>Data identitas tidak ditemukan untuk NIP: ${window.CONFIG?.NIP || '-'}</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Update header
+        const avatarEl = document.querySelector('.profile-avatar');
+        if (avatarEl) avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
+        
+        const nameEl = document.getElementById('profileName');
+        if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
+        
+        const nipEl = document.getElementById('profileNip');
+        if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
+        
+        const badgeEl = document.getElementById('profileStatus');
+        if (badgeEl) {
+          badgeEl.textContent = data.Status_ASN || 'ASN';
+          if (data.Status_ASN === 'PNS') {
+            badgeEl.classList.add('gold');
+          }
+        }
+
+        // Format tanggal
+        const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
+        const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
+
+        const fields = [
+          { label: 'Nama', value: data.Nama },
+          { label: 'NIP', value: data.NIP },
+          { label: 'Status ASN', value: data.Status_ASN },
+          { label: 'Pangkat / Golongan', value: `${data.Pangkat || ''} / ${data.Golongan_Ruang || ''}` },
+          { label: 'Email', value: data.Email },
+          { label: 'No HP', value: data.No_HP },
+          { label: 'Tempat, Tanggal Lahir', value: `${data.Tempat_Lahir || ''}, ${formattedTanggalLahir}` },
+          { label: 'Jenis Kelamin', value: data.Jenis_Kelamin },
+          { label: 'Agama', value: data.Agama },
+          { label: 'Alamat', value: data.Alamat },
+          { label: 'Unit Kerja', value: data.Unit_Kerja },
+          { label: 'Jabatan', value: data.Jabatan },
+          { label: 'TMT Jabatan', value: formattedTMTJabatan },
+          { label: 'Pendidikan Terakhir', value: data.Pendidikan_Terakhir },
+          { label: 'Tahun Lulus', value: data.Tahun_Lulus }
+        ];
+
+        container.innerHTML = fields.map(field => `
+          <div class="identitas-item">
+            <span class="label">${field.label}</span>
+            <span class="value">${field.value || '-'}</span>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('[Profile] Error loadIdentitas:', error);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--danger);">
+            <p>Gagal memuat data identitas: ${error.message}</p>
+            <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">
+              <i class="fas fa-sync"></i> Coba Lagi
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // ============ SETUP TOMBOL EDIT PROFIL ============
+    function setupEditButton() {
+      const editBtn = document.getElementById('editProfileBtn');
+      if (!editBtn) {
+        console.warn('[Profile] Tombol edit tidak ditemukan');
+        return;
+      }
+
+      // Hapus event listener lama (jika ada) dengan clone
+      const newBtn = editBtn.cloneNode(true);
+      editBtn.parentNode.replaceChild(newBtn, editBtn);
+      
+      const btn = document.getElementById('editProfileBtn');
+      
+      btn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (this.disabled) return;
+        
+        this.disabled = true;
+        const icon = this.querySelector('i');
+        const text = document.getElementById('editBtnText');
+        
+        const originalIcon = icon ? icon.className : 'fas fa-edit';
+        const originalText = text ? text.textContent : 'Edit Profil';
+        
+        if (icon) icon.className = 'fas fa-spinner fa-spin';
+        if (text) text.textContent = 'Memuat...';
+        
+        try {
+          await openEditProfile();
+        } catch (error) {
+          console.error('[EditButton] Error:', error);
+          alert('Gagal membuka form edit: ' + error.message);
+        } finally {
+          this.disabled = false;
+          if (icon) icon.className = originalIcon;
+          if (text) text.textContent = originalText;
+        }
+      });
+    }
+
+    // ============ FUNGSI BUKA EDIT PROFIL ============
+    async function openEditProfile() {
+      const isLoggedIn = window.IS_LOGGED_IN || false;
+      
+      if (!isLoggedIn) {
+        alert('Silakan login terlebih dahulu untuk mengedit profil.');
+        return;
+      }
+      
+      try {
+        const editProfile = new EditProfile();
+        await editProfile.openEditModal();
+      } catch (error) {
+        console.error('[EditProfile] Error:', error);
+        throw error;
+      }
+    }
+
+    // ============ SHOW ERROR ============
+    function showError(message) {
+      const container = document.getElementById('profileContainer');
+      if (!container) {
+        console.error('[Profile] Elemen #profileContainer tidak ditemukan');
+        return;
+      }
+      
+      container.innerHTML = `
+        <div style="text-align: center; padding: 80px 20px;">
+          <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
+          <h2>Gagal Memuat Profil</h2>
+          <p style="color: var(--gray);">${message}</p>
+          <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+        </div>
+      `;
+    }
+
+    // ============ INIT HEADER ============
+    function initHeader() {
+      const header = document.getElementById('header');
+      if (header) {
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+          } else {
+            header.classList.remove('scrolled');
+          }
+        });
+      }
+
+      const userBtn = document.getElementById('userBtn');
+      const userDropdown = document.getElementById('userDropdown');
+      
+      if (userBtn && userDropdown) {
+        userBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', () => {
+          userDropdown.classList.remove('active');
+        });
+      }
+
+      // ===== LOGOUT =====
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (typeof window.logout === 'function') {
+            window.logout();
+          } else {
+            localStorage.removeItem('loginData');
+            document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
+            window.location.href = 'https://www.singgatera.my.id/';
+          }
+        });
+      }
+    }
+
+    // ============ INIT SCROLL TOP ============
+    function initScrollTop() {
+      const scrollTopBtn = document.getElementById('scrollTop');
+      if (!scrollTopBtn) return;
+      
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) {
+          scrollTopBtn.classList.add('active');
+        } else {
+          scrollTopBtn.classList.remove('active');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // ============ INIT MOBILE TOGGLE ============
+    function initMobileToggle() {
+      const mobileToggle = document.getElementById('mobileToggle');
+      const nav = document.getElementById('nav');
+      
+      if (!mobileToggle || !nav) return;
+      
+      mobileToggle.addEventListener('click', () => {
+        nav.classList.toggle('active');
+        mobileToggle.innerHTML = nav.classList.contains('active')
+          ? '<i class="fas fa-times"></i>'
+          : '<i class="fas fa-bars"></i>';
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target) && !mobileToggle.contains(e.target)) {
+          nav.classList.remove('active');
+          mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+      });
+    }
+
+    // ============ EXPORT KE GLOBAL ============
+    window.openEditProfile = openEditProfile;
+    window.loadIdentitas = loadIdentitas;
+    window.updateUserInfo = updateUserInfo;
+    window.setupEditButton = setupEditButton;
+    window.showLockedOverlay = showLockedOverlay;
+    window.formatDate = formatDate;
+  </script>
 </body>
 </html>
