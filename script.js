@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('[Profile] window.CONFIG:', window.CONFIG);
   console.log('[Profile] window.IS_LOGGED_IN:', window.IS_LOGGED_IN);
   
-  // ===== CEK APAKAH ELEMEN ADA =====
   const container = document.getElementById('profileContainer');
   if (!container) {
     console.error('[Profile] ERROR: Elemen #profileContainer tidak ditemukan!');
@@ -22,14 +21,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
   
-  // ===== CEK LOGIN =====
   const isLoggedIn = window.IS_LOGGED_IN || false;
   
   if (!isLoggedIn) {
     console.log('[Profile] ❌ Belum login, menampilkan lock screen');
     showLockedOverlay();
     
-    // Cek apakah ada parameter redirect dari URL
     const urlParams = new URLSearchParams(window.location.search);
     const hasRedirect = urlParams.has('loginData');
     
@@ -45,19 +42,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   console.log('[Profile] ✅ Login confirmed, loading data...');
 
-  // ===== UPDATE HEADER =====
   updateUserInfo();
 
-  // ===== LOAD DATA =====
   try {
-    // 1. Load Identitas
     await loadIdentitas();
     
-    // 2. Load Rekap Kompetensi
     const kompetensiRenderer = new KompetensiRenderer();
     await kompetensiRenderer.renderRekap('rekapContainer');
     
-    // 3. Load Spider Chart
     const spiderChart = new SpiderChart('spiderChart');
     await spiderChart.loadData();
     
@@ -66,12 +58,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     showError(error.message);
   }
 
-  // ===== INIT COMPONENTS =====
   initHeader();
   initScrollTop();
   initMobileToggle();
   
-  // ===== SETUP TOMBOL EDIT PROFIL =====
   setupEditButton();
 });
 
@@ -149,7 +139,7 @@ function showLockedOverlay() {
   }
 }
 
-// ============ LOAD IDENTITAS (DENGAN FOTO PROFILE) ============
+// ============ LOAD IDENTITAS ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
   if (!container) {
@@ -173,7 +163,6 @@ async function loadIdentitas() {
     // ===== UPDATE AVATAR DENGAN FOTO =====
     const avatarEl = document.getElementById('profileAvatar') || document.querySelector('.profile-avatar');
     if (avatarEl) {
-      // Coba ambil dari data, fallback ke localStorage
       const photoUrl = data.Foto_Profile || localStorage.getItem(`profile_photo_${window.CONFIG?.NIP || ''}`);
       
       if (photoUrl && photoUrl.startsWith('http')) {
@@ -185,15 +174,12 @@ async function loadIdentitas() {
       }
     }
     
-    // ===== UPDATE NAMA =====
     const nameEl = document.getElementById('profileName');
     if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
     
-    // ===== UPDATE NIP =====
     const nipEl = document.getElementById('profileNip');
     if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
     
-    // ===== UPDATE STATUS =====
     const badgeEl = document.getElementById('profileStatus');
     if (badgeEl) {
       badgeEl.textContent = data.Status_ASN || 'ASN';
@@ -202,11 +188,9 @@ async function loadIdentitas() {
       }
     }
 
-    // ===== FORMAT TANGGAL =====
     const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
     const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
 
-    // ===== RENDER IDENTITAS =====
     const fields = [
       { label: 'Nama', value: data.Nama },
       { label: 'NIP', value: data.NIP },
@@ -253,7 +237,6 @@ function setupEditButton() {
     return;
   }
 
-  // Hapus event listener lama (jika ada) dengan clone
   const newBtn = editBtn.cloneNode(true);
   editBtn.parentNode.replaceChild(newBtn, editBtn);
   
@@ -262,30 +245,24 @@ function setupEditButton() {
   btn.addEventListener('click', async function(e) {
     e.preventDefault();
     
-    // Cegah double klik
     if (this.disabled) return;
     
-    // Nonaktifkan tombol dan tampilkan loading
     this.disabled = true;
     const icon = this.querySelector('i');
     const text = document.getElementById('editBtnText');
     
-    // Simpan konten asli
     const originalIcon = icon ? icon.className : 'fas fa-edit';
     const originalText = text ? text.textContent : 'Edit Profil';
     
-    // Tampilkan loading
     if (icon) icon.className = 'fas fa-spinner fa-spin';
     if (text) text.textContent = 'Memuat...';
     
     try {
-      // Panggil fungsi openEditProfile
       await openEditProfile();
     } catch (error) {
       console.error('[EditButton] Error:', error);
       alert('Gagal membuka form edit: ' + error.message);
     } finally {
-      // Kembalikan tombol ke keadaan semula
       this.disabled = false;
       if (icon) icon.className = originalIcon;
       if (text) text.textContent = originalText;
@@ -363,19 +340,14 @@ function initHeader() {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
       
-      // ===== HAPUS SEMUA DATA LOGIN =====
-      // Hapus cookie
       document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
-      // Hapus localStorage
       localStorage.removeItem('loginData');
-      // Hapus sessionStorage
       sessionStorage.removeItem('redirectAfterLogin');
       
       console.log('[Profile] ✅ Logout: Semua data login dihapus');
       
       alert('Anda telah keluar dari sistem.');
       
-      // Redirect ke home dengan parameter logout
       window.location.href = 'https://www.singgatera.my.id/?logout=true';
     });
   }
