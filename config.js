@@ -3,8 +3,13 @@ const CONFIG = {
   // GAS URL untuk READ (membaca data)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   
-  // GAS URL untuk WRITE (menyimpan data)
-  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxgrroFCX-rj3XutVILU25gSLIqoocgb93iSfdeSGfjcLqDYabFnvbfRPr0Cb2GiZPNLg/exec',
+  // GAS URL untuk WRITE (menyimpan data + upload foto) - URL TERBARU
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxTZof3_fsE0UE3CkXxNb71iDkuGPIp-AlHGKg5MOiiP21XRAwSwYTqrIoUYYReAQ61cg/exec',
+  
+  // ===== GITHUB CONFIG - HANYA REFERENSI =====
+  // TOKEN DISIMPAN DI GAS, BUKAN DI SINI!
+  GITHUB_REPO: 'bidangpkabkpsdmciamis/ProfileASNCiamis',
+  GITHUB_BRANCH: 'main',
   
   NIP: '',
   USER_NAME: 'Guest',
@@ -20,7 +25,6 @@ function getCookie(name) {
       try {
         return JSON.parse(decodeURIComponent(value));
       } catch (e) {
-        console.error('[Cookie] Gagal parse:', e);
         return null;
       }
     }
@@ -28,12 +32,12 @@ function getCookie(name) {
   return null;
 }
 
-// ============ FUNGSI CEK LOGIN (DIPERBAIKI DENGAN COOKIE) ============
+// ============ FUNGSI CEK LOGIN ============
 function checkLoginStatus() {
   try {
     console.log('[Profile] ===== CHECK LOGIN STATUS =====');
     
-    // ===== STEP 1: CEK URL PARAMETER (dari redirect login) =====
+    // ===== STEP 1: CEK URL PARAMETER =====
     const urlParams = new URLSearchParams(window.location.search);
     const loginDataParam = urlParams.get('loginData');
     
@@ -41,23 +45,14 @@ function checkLoginStatus() {
       console.log('[Profile] ✅ Login data ditemukan di URL parameter');
       try {
         const loginData = JSON.parse(decodeURIComponent(loginDataParam));
-        console.log('[Profile] Data login dari URL:', loginData);
-        
-        // Simpan ke localStorage
         localStorage.setItem('loginData', JSON.stringify(loginData));
-        console.log('[Profile] ✅ Data login tersimpan ke localStorage');
         
-        // Simpan ke cookie
         const cookieValue = encodeURIComponent(JSON.stringify(loginData));
         document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-        console.log('[Profile] ✅ Data login tersimpan ke cookie');
         
-        // Hapus parameter dari URL (bersihkan URL)
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
-        console.log('[Profile] ✅ URL parameter dihapus');
         
-        // Set CONFIG
         CONFIG.NIP = loginData.username || '';
         CONFIG.USER_NAME = loginData.name || 'Guest';
         CONFIG.USER_EMAIL = loginData.email || '';
@@ -69,12 +64,11 @@ function checkLoginStatus() {
       }
     }
     
-    // ===== STEP 2: CEK COOKIE (PRIORITAS UTAMA) =====
+    // ===== STEP 2: CEK COOKIE =====
     const cookieData = getCookie('loginData');
     
     if (cookieData) {
       console.log('[Profile] ✅ Login data ditemukan di COOKIE');
-      console.log('[Profile] Data cookie:', cookieData);
       
       const nip = cookieData.username || '';
       const name = cookieData.name || 'Guest';
@@ -84,7 +78,6 @@ function checkLoginStatus() {
         return false;
       }
       
-      // Cek masa berlaku (sama hari)
       const loginTime = new Date(cookieData.loginTime);
       const currentTime = new Date();
       const isSameDay = 
@@ -94,16 +87,12 @@ function checkLoginStatus() {
       
       if (!isSameDay) {
         console.log('[Profile] ⚠️ Cookie login sudah kadaluarsa');
-        // Hapus cookie
         document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
         return false;
       }
       
-      // ===== SYNC KE LOCALSTORAGE =====
       localStorage.setItem('loginData', JSON.stringify(cookieData));
-      console.log('[Profile] ✅ Data cookie disinkronkan ke localStorage');
       
-      // Set CONFIG
       CONFIG.NIP = nip;
       CONFIG.USER_NAME = name;
       CONFIG.USER_EMAIL = cookieData.email || '';
@@ -114,7 +103,7 @@ function checkLoginStatus() {
     
     console.log('[Profile] ❌ Tidak ada cookie login');
     
-    // ===== STEP 3: FALLBACK KE LOCALSTORAGE =====
+    // ===== STEP 3: CEK LOCALSTORAGE =====
     const loginData = localStorage.getItem('loginData');
     
     if (loginData) {
@@ -128,7 +117,6 @@ function checkLoginStatus() {
         return false;
       }
       
-      // Cek masa berlaku
       const loginTime = new Date(userData.loginTime);
       const currentTime = new Date();
       const isSameDay = 
@@ -142,10 +130,8 @@ function checkLoginStatus() {
         return false;
       }
       
-      // ===== RESTORE COOKIE =====
       const cookieValue = encodeURIComponent(JSON.stringify(userData));
       document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-      console.log('[Profile] ✅ Cookie direstore dari localStorage');
       
       CONFIG.NIP = nip;
       CONFIG.USER_NAME = name;
@@ -166,12 +152,8 @@ function checkLoginStatus() {
 
 // ============ FUNGSI LOGOUT ============
 function logout() {
-  // Hapus cookie
   document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
-  // Hapus localStorage
   localStorage.removeItem('loginData');
-  // Hapus sessionStorage
-  sessionStorage.removeItem('redirectAfterLogin');
   console.log('[Profile] ✅ Logout berhasil - semua data dihapus');
   window.location.href = 'https://www.singgatera.my.id/?logout=true';
 }
