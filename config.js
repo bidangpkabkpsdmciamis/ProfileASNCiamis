@@ -4,7 +4,7 @@ const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   
   // GAS URL untuk WRITE 
-  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxTZof3_fsE0UE3CkXxNb71iDkuGPIp-AlHGKg5MOiiP21XRAwSwYTqrIoUYYReAQ61cg/exec',
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxxaqYS3OiDeGHTBJ5PxGDHncAvfB2NOEJSFxVPJE9RnqftwyX_Rs17yAoZBawNNubPxg/exec',
   
   // ===== GITHUB CONFIG - HANYA REFERENSI =====
 
