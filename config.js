@@ -7,7 +7,7 @@ const CONFIG = {
   GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbw8TCo4rVmDgGMSZgm-mJzbkSoaY8rj90pJvbEqRWDMafAES4bLSCB44TVyOMI_cixazw/exec',
   
   // GAS URL untuk UPLOAD FOTO (khusus upload ke GitHub)
-  GAS_UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbyloiCR0XYjTQFN3QT0Hzv34RdvFabPToyQ7o_ylM_4OqfypgEQGRuXbwhUL7djqiZb/exec', 
+  GAS_UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbxVLUhU6-LE6YHT9POvh_vvyPjp0LpjfO59O6tXMetNy5CvMiVzy03-ZmWkBFSGQKot/exec', 
   
   // Referensi GitHub (token di GAS Upload)
   GITHUB_REPO: 'bidangpkabkpsdmciamis/ProfileASNCiamis',
