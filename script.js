@@ -160,14 +160,14 @@ async function loadIdentitas() {
       return;
     }
 
-    // ===== UPDATE AVATAR DENGAN FOTO =====
+    // ===== UPDATE AVATAR DENGAN FOTO (BASE64) =====
     const avatarEl = document.getElementById('profileAvatar') || document.querySelector('.profile-avatar');
     if (avatarEl) {
-      const photoUrl = data.Foto_Profile || localStorage.getItem(`profile_photo_${window.CONFIG?.NIP || ''}`);
+      const photoData = data.Foto_Profile || '';
       
-      if (photoUrl && photoUrl.startsWith('http')) {
-        avatarEl.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user-circle\\'></i>';">`;
-        console.log('[Profile] ✅ Foto profile ditampilkan:', photoUrl);
+      if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+        avatarEl.innerHTML = `<img src="${photoData}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user-circle\\'></i>';">`;
+        console.log('[Profile] ✅ Foto ditampilkan (base64/URL)');
       } else {
         avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
         console.log('[Profile] ℹ️ Tidak ada foto, menggunakan icon default');
