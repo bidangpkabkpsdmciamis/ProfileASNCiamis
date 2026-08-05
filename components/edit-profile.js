@@ -10,8 +10,7 @@ class EditProfile {
     this.photoDataUrl = null;
     this.isPhotoCropped = false;
     
-    // GitHub Config untuk upload foto
-    this.githubToken = window.CONFIG?.GITHUB_TOKEN || '';
+    // GitHub config - hanya untuk referensi, token di GAS
     this.githubRepo = window.CONFIG?.GITHUB_REPO || 'bidangpkabkpsdmciamis/ProfileASNCiamis';
     this.githubBranch = window.CONFIG?.GITHUB_BRANCH || 'main';
     this.assetFolder = 'assets/profiles';
@@ -46,12 +45,22 @@ class EditProfile {
     const photoPreview = document.getElementById('photoPreview');
     if (!photoPreview) return;
     
-    // Cek apakah ada foto di localStorage atau dari data
+    // Cek apakah ada foto di data atau localStorage
     const photoUrl = this.data?.Foto_Profile || localStorage.getItem(`profile_photo_${this.nip}`);
     
-    if (photoUrl) {
+    if (photoUrl && photoUrl.startsWith('http')) {
       photoPreview.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
       photoPreview.style.background = 'none';
+      
+      // Tampilkan tombol hapus
+      const removeBtn = document.getElementById('removePhotoBtn');
+      if (removeBtn) removeBtn.style.display = 'inline-flex';
+      
+      const status = document.getElementById('photoStatus');
+      if (status) {
+        status.textContent = '✅ Foto sudah terupload';
+        status.style.color = 'var(--success)';
+      }
     } else {
       photoPreview.innerHTML = `<i class="fas fa-user" style="font-size:2.5rem;color:var(--gray);"></i>`;
       photoPreview.style.background = 'var(--light-gray)';
@@ -162,19 +171,19 @@ class EditProfile {
                   cursor: pointer;
                   font-weight: 600;
                   transition: var(--transition);
-                  display: ${this.data?.Foto_Profile ? 'inline-flex' : 'none'};
+                  display: none;
                 ">
                   <i class="fas fa-trash"></i> Hapus
                 </button>
               </div>
               <div id="photoStatus" style="margin-top: 8px; font-size: 0.85rem; color: var(--gray);">
-                ${this.data?.Foto_Profile ? '✅ Foto sudah terupload' : 'Belum ada foto'}
+                Belum ada foto
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ===== CROP MODAL (hidden by default) ===== -->
+        <!-- ===== CROP MODAL ===== -->
         <div id="cropContainer" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
           <div style="background: white; border-radius: 24px; padding: 30px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -327,7 +336,6 @@ class EditProfile {
     const uploadBtn = document.getElementById('uploadPhotoBtn');
     if (!uploadBtn) return;
 
-    // Buat hidden file input
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -350,13 +358,11 @@ class EditProfile {
 
   // ===== HANDLE PHOTO FILE =====
   handlePhotoFile(file) {
-    // Validasi ukuran file (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Ukuran file terlalu besar. Maksimal 5MB.');
       return;
     }
 
-    // Validasi tipe file
     if (!file.type.startsWith('image/')) {
       alert('File harus berupa gambar.');
       return;
@@ -378,43 +384,47 @@ class EditProfile {
     const cancelCropBtn = document.getElementById('cancelCropBtn');
     const applyCropBtn = document.getElementById('applyCropBtn');
 
-    // Inisialisasi Cropper.js
     let cropper = null;
 
-    // Fungsi buka crop
     window.openCropModal = () => {
       if (!this.photoDataUrl) return;
       
       cropContainer.style.display = 'flex';
       cropImage.src = this.photoDataUrl;
 
-      // Tunggu image load
       cropImage.onload = () => {
         if (cropper) {
           cropper.destroy();
         }
         
-        // Inisialisasi Cropper dengan rasio 1:2
-        cropper = new Cropper(cropImage, {
-          aspectRatio: 1 / 2,
-          viewMode: 1,
-          dragMode: 'move',
-          autoCropArea: 0.8,
-          restore: false,
-          guides: true,
-          center: true,
-          highlight: false,
-          cropBoxMovable: true,
-          cropBoxResizable: true,
-          toggleDragModeOnDblclick: false,
-          ready: function() {
-            console.log('[Crop] Cropper siap');
-          }
-        });
+        if (typeof Cropper !== 'undefined') {
+          cropper = new Cropper(cropImage, {
+            aspectRatio: 1 / 2,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.8,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false
+          });
+        } else {
+          // Load Cropper.js jika belum ada
+          this.loadCropperJS(() => {
+            cropper = new Cropper(cropImage, {
+              aspectRatio: 1 / 2,
+              viewMode: 1,
+              dragMode: 'move',
+              autoCropArea: 0.8
+            });
+          });
+        }
       };
     };
 
-    // Tutup crop
     const closeCrop = () => {
       cropContainer.style.display = 'none';
       if (cropper) {
@@ -426,12 +436,10 @@ class EditProfile {
     closeCropBtn.addEventListener('click', closeCrop);
     cancelCropBtn.addEventListener('click', closeCrop);
 
-    // Apply crop
     applyCropBtn.addEventListener('click', () => {
       if (!cropper) return;
 
       try {
-        // Dapatkan hasil crop
         const canvas = cropper.getCroppedCanvas({
           width: 400,
           height: 800,
@@ -444,33 +452,28 @@ class EditProfile {
           return;
         }
 
-        // Konversi ke blob
         canvas.toBlob((blob) => {
           if (!blob) {
             alert('Gagal memproses gambar. Silakan coba lagi.');
             return;
           }
 
-          // Simpan file
           this.photoFile = new File([blob], `${this.nip}_${Date.now()}.jpg`, {
             type: 'image/jpeg'
           });
 
-          // Update preview
           const preview = document.getElementById('photoPreview');
           if (preview) {
             preview.innerHTML = `<img src="${canvas.toDataURL('image/jpeg')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
             preview.style.background = 'none';
           }
 
-          // Update status
           const status = document.getElementById('photoStatus');
           if (status) {
             status.textContent = '✅ Foto baru siap diupload';
             status.style.color = 'var(--success)';
           }
 
-          // Tampilkan tombol hapus
           const removeBtn = document.getElementById('removePhotoBtn');
           if (removeBtn) {
             removeBtn.style.display = 'inline-flex';
@@ -487,9 +490,20 @@ class EditProfile {
         alert('Terjadi kesalahan saat crop: ' + error.message);
       }
     });
+  }
 
-    // Expose fungsi untuk digunakan di event
-    window.openCropModal = window.openCropModal;
+  // ===== LOAD CROPPER.JS =====
+  loadCropperJS(callback) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js';
+    script.onload = callback;
+    document.head.appendChild(script);
+    
+    // Load CSS juga
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css';
+    document.head.appendChild(link);
   }
 
   // ===== OPEN CROP MODAL =====
@@ -497,15 +511,12 @@ class EditProfile {
     if (typeof window.openCropModal === 'function') {
       window.openCropModal();
     } else {
-      console.error('[Crop] Fungsi openCropModal tidak tersedia');
-      // Fallback: langsung buka crop container
       const cropContainer = document.getElementById('cropContainer');
       const cropImage = document.getElementById('cropImage');
       if (cropContainer && cropImage) {
         cropContainer.style.display = 'flex';
         cropImage.src = this.photoDataUrl;
         cropImage.onload = () => {
-          // Inisialisasi cropper sederhana
           if (typeof Cropper !== 'undefined') {
             new Cropper(cropImage, {
               aspectRatio: 1 / 2,
@@ -530,96 +541,74 @@ class EditProfile {
         this.photoDataUrl = null;
         this.isPhotoCropped = false;
 
-        // Reset preview
         const preview = document.getElementById('photoPreview');
         if (preview) {
           preview.innerHTML = `<i class="fas fa-user" style="font-size:2.5rem;color:var(--gray);"></i>`;
           preview.style.background = 'var(--light-gray)';
         }
 
-        // Update status
         const status = document.getElementById('photoStatus');
         if (status) {
           status.textContent = 'Foto akan dihapus saat disimpan';
           status.style.color = 'var(--danger)';
         }
 
-        // Sembunyikan tombol hapus
         removeBtn.style.display = 'none';
-
-        // Hapus dari data
         this.data.Foto_Profile = null;
+        localStorage.removeItem(`profile_photo_${this.nip}`);
       }
     });
   }
 
-  // ===== UPLOAD FOTO KE GITHUB =====
+  // ===== UPLOAD FOTO VIA GAS (AMAN) =====
   async uploadPhotoToGitHub(base64Data, fileName) {
-    if (!this.githubToken) {
-      console.warn('[GitHub] Token tidak tersedia, simpan foto sebagai base64');
-      return null;
-    }
-
     try {
-      // Hapus prefix base64
-      const base64Image = base64Data.split(',')[1] || base64Data;
+      const gasWriteUrl = this.gasWriteUrl || window.CONFIG?.GAS_WRITE_URL || '';
       
-      // Nama file: NIP_Nama.jpg
-      const safeFileName = `${this.nip}_${fileName || 'profile'}.jpg`;
-      const path = `${this.assetFolder}/${safeFileName}`;
-
-      // Cek apakah file sudah ada
-      const checkUrl = `https://api.github.com/repos/${this.githubRepo}/contents/${path}`;
-      let sha = null;
-      
-      try {
-        const checkResponse = await fetch(checkUrl, {
-          headers: {
-            'Authorization': `token ${this.githubToken}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-        if (checkResponse.ok) {
-          const data = await checkResponse.json();
-          sha = data.sha;
-        }
-      } catch (e) {
-        // File belum ada, lanjutkan
+      if (!gasWriteUrl) {
+        console.error('[EditProfile] GAS_URL tidak tersedia');
+        return base64Data;
       }
-
-      // Upload file
-      const uploadUrl = `https://api.github.com/repos/${this.githubRepo}/contents/${path}`;
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
+      
+      console.log('[EditProfile] Upload foto via GAS...');
+      console.log('[EditProfile] GAS URL:', gasWriteUrl);
+      
+      const payload = {
+        action: 'uploadPhoto',
+        nip: this.nip,
+        nama: this.data?.Nama || 'profile',
+        base64Image: base64Data
+      };
+      
+      const response = await fetch(gasWriteUrl, {
+        method: 'POST',
         headers: {
-          'Authorization': `token ${this.githubToken}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github.v3+json'
         },
-        body: JSON.stringify({
-          message: `Upload foto profile ${this.nip}`,
-          content: base64Image,
-          branch: this.githubBranch,
-          sha: sha || undefined
-        })
+        body: JSON.stringify(payload)
       });
-
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Gagal upload ke GitHub');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const result = await response.json();
+      console.log('[EditProfile] Response GAS:', result);
       
-      // Dapatkan URL raw
-      const rawUrl = `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/${path}`;
-      console.log('[GitHub] Foto berhasil diupload:', rawUrl);
-      
-      return rawUrl;
+      if (result.success && result.data && result.data.url) {
+        console.log('[EditProfile] Foto berhasil diupload:', result.data.url);
+        // Simpan ke localStorage untuk cache
+        localStorage.setItem(`profile_photo_${this.nip}`, result.data.url);
+        return result.data.url;
+      } else {
+        throw new Error(result.error || 'Gagal upload foto');
+      }
       
     } catch (error) {
-      console.error('[GitHub] Error upload:', error);
-      return null;
+      console.error('[EditProfile] Error upload foto:', error);
+      // Fallback: simpan sebagai base64 di spreadsheet
+      console.warn('[EditProfile] Menggunakan fallback base64');
+      return base64Data;
     }
   }
 
@@ -737,29 +726,25 @@ class EditProfile {
         }
       });
 
-      // ===== 2. UPLOAD FOTO KE GITHUB =====
+      // ===== 2. UPLOAD FOTO VIA GAS =====
       let photoUrl = this.data?.Foto_Profile || null;
       
       if (this.photoFile && this.isPhotoCropped) {
         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload foto...';
         
-        // Konversi ke base64
         const reader = new FileReader();
         const photoData = await new Promise((resolve) => {
           reader.onload = (e) => resolve(e.target.result);
           reader.readAsDataURL(this.photoFile);
         });
 
-        // Upload ke GitHub
-        const fileName = `${this.nip}_${updatedData.Nama || 'profile'}`;
-        photoUrl = await this.uploadPhotoToGitHub(photoData, fileName);
+        photoUrl = await this.uploadPhotoToGitHub(photoData, updatedData.Nama || 'profile');
         
-        if (photoUrl) {
+        if (photoUrl && photoUrl.startsWith('http')) {
           updatedData.Foto_Profile = photoUrl;
-          // Simpan ke localStorage untuk cache
           localStorage.setItem(`profile_photo_${this.nip}`, photoUrl);
         } else {
-          // Jika upload gagal, simpan sebagai base64 (fallback)
+          // Jika upload gagal atau return base64, simpan sebagai base64
           updatedData.Foto_Profile = photoData;
         }
       } else if (this.photoFile === null && this.data?.Foto_Profile) {
@@ -770,7 +755,7 @@ class EditProfile {
 
       console.log('[EditProfile] Sending data:', updatedData);
 
-      // ===== 3. KIRIM KE GAS =====
+      // ===== 3. KIRIM KE GAS UNTUK UPDATE SPREADSHEET =====
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan data...';
       
       const response = await fetch(this.gasWriteUrl, {
@@ -822,7 +807,6 @@ function closeEditModal() {
   if (modal) {
     modal.style.display = 'none';
   }
-  // Hapus crop container jika ada
   const cropContainer = document.getElementById('cropContainer');
   if (cropContainer) {
     cropContainer.style.display = 'none';
