@@ -9,6 +9,8 @@ class EditProfile {
     this.photoFile = null;
     this.photoDataUrl = null;
     this.isPhotoCropped = false;
+    this.cropper = null;
+    this.cropperReady = false;
     
     // GitHub config - hanya untuk referensi, token di GAS
     this.githubRepo = window.CONFIG?.GITHUB_REPO || 'bidangpkabkpsdmciamis/ProfileASNCiamis';
@@ -23,6 +25,9 @@ class EditProfile {
   // ===== BUKA MODAL EDIT =====
   async openEditModal() {
     try {
+      // Load Cropper.js terlebih dahulu
+      await this.loadCropperJS();
+      
       this.data = await this.api.getIdentitas();
       
       if (!this.data) {
@@ -40,19 +45,49 @@ class EditProfile {
     }
   }
 
+  // ===== LOAD CROPPER.JS =====
+  loadCropperJS() {
+    return new Promise((resolve, reject) => {
+      // Cek apakah sudah ada
+      if (typeof Cropper !== 'undefined') {
+        this.cropperReady = true;
+        resolve();
+        return;
+      }
+      
+      // Load CSS
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css';
+      document.head.appendChild(link);
+      
+      // Load JS
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js';
+      script.onload = () => {
+        this.cropperReady = true;
+        console.log('[EditProfile] Cropper.js loaded');
+        resolve();
+      };
+      script.onerror = () => {
+        console.error('[EditProfile] Gagal load Cropper.js');
+        reject(new Error('Gagal memuat library Cropper.js'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
   // ===== LOAD FOTO EXISTING =====
   loadExistingPhoto() {
     const photoPreview = document.getElementById('photoPreview');
     if (!photoPreview) return;
     
-    // Cek apakah ada foto di data atau localStorage
     const photoUrl = this.data?.Foto_Profile || localStorage.getItem(`profile_photo_${this.nip}`);
     
     if (photoUrl && photoUrl.startsWith('http')) {
       photoPreview.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
       photoPreview.style.background = 'none';
       
-      // Tampilkan tombol hapus
       const removeBtn = document.getElementById('removePhotoBtn');
       if (removeBtn) removeBtn.style.display = 'inline-flex';
       
@@ -384,21 +419,34 @@ class EditProfile {
     const cancelCropBtn = document.getElementById('cancelCropBtn');
     const applyCropBtn = document.getElementById('applyCropBtn');
 
-    let cropper = null;
-
-    window.openCropModal = () => {
+    // ===== FUNGSI BUKA CROP =====
+    this.openCropModal = () => {
       if (!this.photoDataUrl) return;
+      
+      // Pastikan Cropper sudah siap
+      if (!this.cropperReady) {
+        alert('Library crop sedang dimuat. Silakan tunggu sebentar.');
+        this.loadCropperJS().then(() => {
+          this.openCropModal();
+        }).catch(() => {
+          alert('Gagal memuat library crop. Periksa koneksi internet Anda.');
+        });
+        return;
+      }
       
       cropContainer.style.display = 'flex';
       cropImage.src = this.photoDataUrl;
 
       cropImage.onload = () => {
-        if (cropper) {
-          cropper.destroy();
+        // Destroy cropper lama jika ada
+        if (this.cropper) {
+          this.cropper.destroy();
+          this.cropper = null;
         }
         
-        if (typeof Cropper !== 'undefined') {
-          cropper = new Cropper(cropImage, {
+        // Inisialisasi Cropper baru
+        try {
+          this.cropper = new Cropper(cropImage, {
             aspectRatio: 1 / 2,
             viewMode: 1,
             dragMode: 'move',
@@ -411,36 +459,35 @@ class EditProfile {
             cropBoxResizable: true,
             toggleDragModeOnDblclick: false
           });
-        } else {
-          // Load Cropper.js jika belum ada
-          this.loadCropperJS(() => {
-            cropper = new Cropper(cropImage, {
-              aspectRatio: 1 / 2,
-              viewMode: 1,
-              dragMode: 'move',
-              autoCropArea: 0.8
-            });
-          });
+          console.log('[EditProfile] Cropper initialized');
+        } catch (error) {
+          console.error('[EditProfile] Error init Cropper:', error);
+          alert('Gagal menginisialisasi crop. Silakan coba lagi.');
         }
       };
     };
 
+    // ===== TUTUP CROP =====
     const closeCrop = () => {
       cropContainer.style.display = 'none';
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
+      if (this.cropper) {
+        this.cropper.destroy();
+        this.cropper = null;
       }
     };
 
     closeCropBtn.addEventListener('click', closeCrop);
     cancelCropBtn.addEventListener('click', closeCrop);
 
+    // ===== APPLY CROP =====
     applyCropBtn.addEventListener('click', () => {
-      if (!cropper) return;
+      if (!this.cropper) {
+        alert('Silakan crop foto terlebih dahulu.');
+        return;
+      }
 
       try {
-        const canvas = cropper.getCroppedCanvas({
+        const canvas = this.cropper.getCroppedCanvas({
           width: 400,
           height: 800,
           imageSmoothingEnabled: true,
@@ -458,22 +505,26 @@ class EditProfile {
             return;
           }
 
+          // Simpan file hasil crop
           this.photoFile = new File([blob], `${this.nip}_${Date.now()}.jpg`, {
             type: 'image/jpeg'
           });
 
+          // Update preview
           const preview = document.getElementById('photoPreview');
           if (preview) {
             preview.innerHTML = `<img src="${canvas.toDataURL('image/jpeg')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
             preview.style.background = 'none';
           }
 
+          // Update status
           const status = document.getElementById('photoStatus');
           if (status) {
             status.textContent = '✅ Foto baru siap diupload';
             status.style.color = 'var(--success)';
           }
 
+          // Tampilkan tombol hapus
           const removeBtn = document.getElementById('removePhotoBtn');
           if (removeBtn) {
             removeBtn.style.display = 'inline-flex';
@@ -492,41 +543,11 @@ class EditProfile {
     });
   }
 
-  // ===== LOAD CROPPER.JS =====
-  loadCropperJS(callback) {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js';
-    script.onload = callback;
-    document.head.appendChild(script);
-    
-    // Load CSS juga
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css';
-    document.head.appendChild(link);
-  }
-
   // ===== OPEN CROP MODAL =====
   openCropModal() {
-    if (typeof window.openCropModal === 'function') {
-      window.openCropModal();
-    } else {
-      const cropContainer = document.getElementById('cropContainer');
-      const cropImage = document.getElementById('cropImage');
-      if (cropContainer && cropImage) {
-        cropContainer.style.display = 'flex';
-        cropImage.src = this.photoDataUrl;
-        cropImage.onload = () => {
-          if (typeof Cropper !== 'undefined') {
-            new Cropper(cropImage, {
-              aspectRatio: 1 / 2,
-              viewMode: 1,
-              dragMode: 'move',
-              autoCropArea: 0.8
-            });
-          }
-        };
-      }
+    // Implementasi di setupCropModal
+    if (typeof this._openCropModal === 'function') {
+      this._openCropModal();
     }
   }
 
@@ -597,7 +618,6 @@ class EditProfile {
       
       if (result.success && result.data && result.data.url) {
         console.log('[EditProfile] Foto berhasil diupload:', result.data.url);
-        // Simpan ke localStorage untuk cache
         localStorage.setItem(`profile_photo_${this.nip}`, result.data.url);
         return result.data.url;
       } else {
@@ -606,7 +626,6 @@ class EditProfile {
       
     } catch (error) {
       console.error('[EditProfile] Error upload foto:', error);
-      // Fallback: simpan sebagai base64 di spreadsheet
       console.warn('[EditProfile] Menggunakan fallback base64');
       return base64Data;
     }
@@ -701,7 +720,7 @@ class EditProfile {
     }
   }
 
-  // ===== SAVE DATA (DENGAN UPLOAD FOTO) =====
+  // ===== SAVE DATA =====
   async saveData() {
     const saveBtn = document.getElementById('saveProfileBtn');
     const originalText = saveBtn.innerHTML;
@@ -744,18 +763,16 @@ class EditProfile {
           updatedData.Foto_Profile = photoUrl;
           localStorage.setItem(`profile_photo_${this.nip}`, photoUrl);
         } else {
-          // Jika upload gagal atau return base64, simpan sebagai base64
           updatedData.Foto_Profile = photoData;
         }
       } else if (this.photoFile === null && this.data?.Foto_Profile) {
-        // Jika foto dihapus
         updatedData.Foto_Profile = null;
         localStorage.removeItem(`profile_photo_${this.nip}`);
       }
 
       console.log('[EditProfile] Sending data:', updatedData);
 
-      // ===== 3. KIRIM KE GAS UNTUK UPDATE SPREADSHEET =====
+      // ===== 3. KIRIM KE GAS =====
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan data...';
       
       const response = await fetch(this.gasWriteUrl, {
