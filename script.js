@@ -186,9 +186,16 @@ async function loadIdentitas() {
       if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
         avatarEl.innerHTML = `<img src="${photoData}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user-circle\\'></i>';">`;
         console.log('[Profile] ✅ Foto profile ditampilkan');
+        
+        // ===== SIMPAN FOTO KE COOKIE UNTUK SUBDOMAIN LAIN =====
+        const cookieValue = encodeURIComponent(photoData);
+        document.cookie = `headerPhoto=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+        console.log('[Profile] ✅ Foto disimpan ke cookie untuk header');
       } else {
         avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
-        console.log('[Profile] ℹ️ Tidak ada foto, menggunakan icon default');
+        // Hapus cookie jika tidak ada foto
+        document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
+        console.log('[Profile] ℹ️ Tidak ada foto, cookie dihapus');
       }
     }
     
@@ -365,11 +372,15 @@ function initHeader() {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
       
+      // Hapus cookie login
       document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
+      // Hapus cookie foto header
+      document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
+      // Hapus localStorage
       localStorage.removeItem('loginData');
       sessionStorage.removeItem('redirectAfterLogin');
       
-      // ===== RESET HEADER KE DEFAULT =====
+      // Reset header ke default
       const headerIcon = document.getElementById('headerUserIcon');
       if (headerIcon) {
         headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
