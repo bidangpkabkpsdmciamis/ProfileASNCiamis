@@ -35,11 +35,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     if (!hasRedirect) {
       console.log('[Profile] 🔄 Tidak ada data login, redirect ke login page');
-      // Redirect ke login dengan return URL
       const returnUrl = encodeURIComponent(window.location.href);
       setTimeout(() => {
         window.location.href = `https://www.singgatera.my.id/login.html?redirect=${returnUrl}`;
-      }, 3000); // Delay 3 detik agar user melihat pesan
+      }, 3000);
     }
     return;
   }
@@ -150,7 +149,7 @@ function showLockedOverlay() {
   }
 }
 
-// ============ LOAD IDENTITAS ============
+// ============ LOAD IDENTITAS (DENGAN FOTO PROFILE) ============
 async function loadIdentitas() {
   const container = document.getElementById('identitasContainer');
   if (!container) {
@@ -171,16 +170,30 @@ async function loadIdentitas() {
       return;
     }
 
-    // Update header
-    const avatarEl = document.querySelector('.profile-avatar');
-    if (avatarEl) avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
+    // ===== UPDATE AVATAR DENGAN FOTO =====
+    const avatarEl = document.getElementById('profileAvatar') || document.querySelector('.profile-avatar');
+    if (avatarEl) {
+      // Coba ambil dari data, fallback ke localStorage
+      const photoUrl = data.Foto_Profile || localStorage.getItem(`profile_photo_${window.CONFIG?.NIP || ''}`);
+      
+      if (photoUrl && photoUrl.startsWith('http')) {
+        avatarEl.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user-circle\\'></i>';">`;
+        console.log('[Profile] ✅ Foto profile ditampilkan:', photoUrl);
+      } else {
+        avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
+        console.log('[Profile] ℹ️ Tidak ada foto, menggunakan icon default');
+      }
+    }
     
+    // ===== UPDATE NAMA =====
     const nameEl = document.getElementById('profileName');
     if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
     
+    // ===== UPDATE NIP =====
     const nipEl = document.getElementById('profileNip');
     if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
     
+    // ===== UPDATE STATUS =====
     const badgeEl = document.getElementById('profileStatus');
     if (badgeEl) {
       badgeEl.textContent = data.Status_ASN || 'ASN';
@@ -189,10 +202,11 @@ async function loadIdentitas() {
       }
     }
 
-    // Format tanggal
+    // ===== FORMAT TANGGAL =====
     const formattedTanggalLahir = formatDate(data.Tanggal_Lahir);
     const formattedTMTJabatan = formatDate(data.TMT_Jabatan);
 
+    // ===== RENDER IDENTITAS =====
     const fields = [
       { label: 'Nama', value: data.Nama },
       { label: 'NIP', value: data.NIP },
