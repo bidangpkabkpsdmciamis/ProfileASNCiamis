@@ -1168,6 +1168,31 @@ h1, h2, h3, h4, h5 {
   object-fit: cover; /* PENTING: agar gambar memenuhi lingkaran */
 }
 
+/* ===== USER ICON DI HEADER ===== */
+.user-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Hover effect tetap jalan */
+.user-btn:hover .user-icon {
+  background: var(--primary-light);
+}
+
 /* ===== UTILITY ===== */
 .text-center {
   text-align: center;
