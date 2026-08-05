@@ -3,7 +3,6 @@ class EditProfile {
   constructor() {
     this.api = new ProfileDataAPI();
     this.gasWriteUrl = window.CONFIG?.GAS_WRITE_URL || '';
-    this.gasUploadUrl = window.CONFIG?.GAS_UPLOAD_URL || '';
     this.nip = window.CONFIG?.NIP || '';
     this.data = null;
     this.modal = null;
@@ -15,7 +14,6 @@ class EditProfile {
     
     console.log('[EditProfile] Initialized');
     console.log('[EditProfile] GAS_WRITE_URL:', this.gasWriteUrl);
-    console.log('[EditProfile] GAS_UPLOAD_URL:', this.gasUploadUrl);
     console.log('[EditProfile] NIP:', this.nip);
   }
 
@@ -75,10 +73,10 @@ class EditProfile {
     const photoPreview = document.getElementById('photoPreview');
     if (!photoPreview) return;
     
-    const photoUrl = this.data?.Foto_Profile || localStorage.getItem(`profile_photo_${this.nip}`);
+    const photoData = this.data?.Foto_Profile || '';
     
-    if (photoUrl && photoUrl.startsWith('http')) {
-      photoPreview.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+      photoPreview.innerHTML = `<img src="${photoData}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
       photoPreview.style.background = 'none';
       
       const removeBtn = document.getElementById('removePhotoBtn');
@@ -552,66 +550,8 @@ class EditProfile {
 
         removeBtn.style.display = 'none';
         this.data.Foto_Profile = null;
-        localStorage.removeItem(`profile_photo_${this.nip}`);
       }
     });
-  }
-
-  // ===== UPLOAD FOTO VIA GAS UPLOAD (TERPISAH) =====
-  async uploadPhotoToGitHub(base64Data, fileName) {
-    try {
-      const gasUploadUrl = this.gasUploadUrl || window.CONFIG?.GAS_UPLOAD_URL || '';
-      
-      if (!gasUploadUrl) {
-        console.error('[EditProfile] GAS_UPLOAD_URL tidak tersedia');
-        return base64Data;
-      }
-      
-      console.log('[EditProfile] Upload foto via GAS Upload...');
-      console.log('[EditProfile] GAS Upload URL:', gasUploadUrl);
-      
-      const payload = {
-        nip: this.nip,
-        nama: this.data?.Nama || 'profile',
-        base64Image: base64Data
-      };
-      
-      console.log('[EditProfile] Payload:', {
-        nip: payload.nip,
-        nama: payload.nama,
-        base64Length: payload.base64Image ? payload.base64Image.length : 0
-      });
-      
-      const response = await fetch(gasUploadUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      console.log('[EditProfile] Response status:', response.status);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      console.log('[EditProfile] Response GAS Upload:', result);
-      
-      if (result.success && result.data && result.data.url) {
-        console.log('[EditProfile] ✅ Foto berhasil diupload:', result.data.url);
-        localStorage.setItem(`profile_photo_${this.nip}`, result.data.url);
-        return result.data.url;
-      } else {
-        throw new Error(result.error || 'Gagal upload foto');
-      }
-      
-    } catch (error) {
-      console.error('[EditProfile] ❌ Error upload foto:', error);
-      console.warn('[EditProfile] Menggunakan fallback base64');
-      return base64Data;
-    }
   }
 
   // ===== GENERATE FORM FIELDS =====
@@ -728,11 +668,9 @@ class EditProfile {
         }
       });
 
-      // ===== 2. UPLOAD FOTO VIA GAS UPLOAD =====
-      let photoUrl = this.data?.Foto_Profile || null;
-      
+      // ===== 2. SIMPAN FOTO SEBAGAI BASE64 =====
       if (this.photoFile && this.isPhotoCropped) {
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload foto...';
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses foto...';
         
         const reader = new FileReader();
         const photoData = await new Promise((resolve) => {
@@ -740,20 +678,16 @@ class EditProfile {
           reader.readAsDataURL(this.photoFile);
         });
 
-        photoUrl = await this.uploadPhotoToGitHub(photoData, updatedData.Nama || 'profile');
+        // Simpan base64 langsung ke data
+        updatedData.Foto_Profile = photoData;
+        console.log('[EditProfile] Foto base64 siap disimpan, length:', photoData.length);
         
-        if (photoUrl && photoUrl.startsWith('http')) {
-          updatedData.Foto_Profile = photoUrl;
-          localStorage.setItem(`profile_photo_${this.nip}`, photoUrl);
-        } else {
-          updatedData.Foto_Profile = photoData;
-        }
       } else if (this.photoFile === null && this.data?.Foto_Profile) {
+        // Jika foto dihapus
         updatedData.Foto_Profile = null;
-        localStorage.removeItem(`profile_photo_${this.nip}`);
       }
 
-      console.log('[EditProfile] Sending data:', updatedData);
+      console.log('[EditProfile] Sending data, Foto_Profile length:', updatedData.Foto_Profile ? updatedData.Foto_Profile.length : 0);
 
       // ===== 3. KIRIM KE GAS WRITE =====
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan data...';
@@ -782,16 +716,7 @@ class EditProfile {
 
     } catch (error) {
       console.error('[EditProfile] Save error:', error);
-      
-      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-        alert('✅ Data berhasil dikirim! Halaman akan di-refresh.');
-        this.modal.style.display = 'none';
-        setTimeout(() => {
-          location.reload();
-        }, 1500);
-      } else {
-        alert('❌ Gagal menyimpan data:\n\n' + error.message);
-      }
+      alert('❌ Gagal menyimpan data:\n\n' + error.message);
       
     } finally {
       saveBtn.innerHTML = originalText;
