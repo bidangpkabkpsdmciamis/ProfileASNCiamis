@@ -3,6 +3,7 @@ class EditProfile {
   constructor() {
     this.api = new ProfileDataAPI();
     this.gasWriteUrl = window.CONFIG?.GAS_WRITE_URL || '';
+    this.gasUploadUrl = window.CONFIG?.GAS_UPLOAD_URL || '';
     this.nip = window.CONFIG?.NIP || '';
     this.data = null;
     this.modal = null;
@@ -12,20 +13,15 @@ class EditProfile {
     this.cropper = null;
     this.cropperReady = false;
     
-    // GitHub config - hanya untuk referensi, token di GAS
-    this.githubRepo = window.CONFIG?.GITHUB_REPO || 'bidangpkabkpsdmciamis/ProfileASNCiamis';
-    this.githubBranch = window.CONFIG?.GITHUB_BRANCH || 'main';
-    this.assetFolder = 'assets/profiles';
-    
     console.log('[EditProfile] Initialized');
     console.log('[EditProfile] GAS_WRITE_URL:', this.gasWriteUrl);
+    console.log('[EditProfile] GAS_UPLOAD_URL:', this.gasUploadUrl);
     console.log('[EditProfile] NIP:', this.nip);
   }
 
   // ===== BUKA MODAL EDIT =====
   async openEditModal() {
     try {
-      // Load Cropper.js terlebih dahulu
       await this.loadCropperJS();
       
       this.data = await this.api.getIdentitas();
@@ -48,20 +44,17 @@ class EditProfile {
   // ===== LOAD CROPPER.JS =====
   loadCropperJS() {
     return new Promise((resolve, reject) => {
-      // Cek apakah sudah ada
       if (typeof Cropper !== 'undefined') {
         this.cropperReady = true;
         resolve();
         return;
       }
       
-      // Load CSS
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css';
       document.head.appendChild(link);
       
-      // Load JS
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js';
       script.onload = () => {
@@ -336,12 +329,10 @@ class EditProfile {
 
     document.body.appendChild(this.modal);
 
-    // ===== EVENT LISTENER UPLOAD FOTO =====
     this.setupPhotoUpload();
     this.setupCropModal();
     this.setupRemovePhoto();
 
-    // Event listener checkbox
     const verificationCheck = document.getElementById('verificationCheck');
     const saveBtn = document.getElementById('saveProfileBtn');
 
@@ -419,7 +410,6 @@ class EditProfile {
     const cancelCropBtn = document.getElementById('cancelCropBtn');
     const applyCropBtn = document.getElementById('applyCropBtn');
 
-    // ===== FUNGSI BUKA CROP =====
     this.openCropModal = () => {
       if (!this.photoDataUrl) return;
       
@@ -443,7 +433,6 @@ class EditProfile {
         }
         
         try {
-          // ===== RASIO 4:6 (LEBAR 4 : TINGGI 6) =====
           this.cropper = new Cropper(cropImage, {
             aspectRatio: 4 / 6,
             viewMode: 1,
@@ -465,7 +454,6 @@ class EditProfile {
       };
     };
 
-    // ===== TUTUP CROP =====
     const closeCrop = () => {
       cropContainer.style.display = 'none';
       if (this.cropper) {
@@ -477,7 +465,6 @@ class EditProfile {
     closeCropBtn.addEventListener('click', closeCrop);
     cancelCropBtn.addEventListener('click', closeCrop);
 
-    // ===== APPLY CROP =====
     applyCropBtn.addEventListener('click', () => {
       if (!this.cropper) {
         alert('Silakan crop foto terlebih dahulu.');
@@ -485,7 +472,6 @@ class EditProfile {
       }
 
       try {
-        // ===== UKURAN OUTPUT 400x600 (4:6) =====
         const canvas = this.cropper.getCroppedCanvas({
           width: 400,
           height: 600,
@@ -539,12 +525,7 @@ class EditProfile {
   }
 
   // ===== OPEN CROP MODAL =====
-  openCropModal() {
-    // Implementasi di setupCropModal
-    if (typeof this._openCropModal === 'function') {
-      this._openCropModal();
-    }
-  }
+  openCropModal() {}
 
   // ===== SETUP REMOVE PHOTO =====
   setupRemovePhoto() {
@@ -576,27 +557,32 @@ class EditProfile {
     });
   }
 
-  // ===== UPLOAD FOTO VIA GAS (AMAN) =====
+  // ===== UPLOAD FOTO VIA GAS UPLOAD (TERPISAH) =====
   async uploadPhotoToGitHub(base64Data, fileName) {
     try {
-      const gasWriteUrl = this.gasWriteUrl || window.CONFIG?.GAS_WRITE_URL || '';
+      const gasUploadUrl = this.gasUploadUrl || window.CONFIG?.GAS_UPLOAD_URL || '';
       
-      if (!gasWriteUrl) {
-        console.error('[EditProfile] GAS_URL tidak tersedia');
+      if (!gasUploadUrl) {
+        console.error('[EditProfile] GAS_UPLOAD_URL tidak tersedia');
         return base64Data;
       }
       
-      console.log('[EditProfile] Upload foto via GAS...');
-      console.log('[EditProfile] GAS URL:', gasWriteUrl);
+      console.log('[EditProfile] Upload foto via GAS Upload...');
+      console.log('[EditProfile] GAS Upload URL:', gasUploadUrl);
       
       const payload = {
-        action: 'uploadPhoto',
         nip: this.nip,
         nama: this.data?.Nama || 'profile',
         base64Image: base64Data
       };
       
-      const response = await fetch(gasWriteUrl, {
+      console.log('[EditProfile] Payload:', {
+        nip: payload.nip,
+        nama: payload.nama,
+        base64Length: payload.base64Image ? payload.base64Image.length : 0
+      });
+      
+      const response = await fetch(gasUploadUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -604,15 +590,17 @@ class EditProfile {
         body: JSON.stringify(payload)
       });
       
+      console.log('[EditProfile] Response status:', response.status);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const result = await response.json();
-      console.log('[EditProfile] Response GAS:', result);
+      console.log('[EditProfile] Response GAS Upload:', result);
       
       if (result.success && result.data && result.data.url) {
-        console.log('[EditProfile] Foto berhasil diupload:', result.data.url);
+        console.log('[EditProfile] ✅ Foto berhasil diupload:', result.data.url);
         localStorage.setItem(`profile_photo_${this.nip}`, result.data.url);
         return result.data.url;
       } else {
@@ -620,7 +608,7 @@ class EditProfile {
       }
       
     } catch (error) {
-      console.error('[EditProfile] Error upload foto:', error);
+      console.error('[EditProfile] ❌ Error upload foto:', error);
       console.warn('[EditProfile] Menggunakan fallback base64');
       return base64Data;
     }
@@ -740,7 +728,7 @@ class EditProfile {
         }
       });
 
-      // ===== 2. UPLOAD FOTO VIA GAS =====
+      // ===== 2. UPLOAD FOTO VIA GAS UPLOAD =====
       let photoUrl = this.data?.Foto_Profile || null;
       
       if (this.photoFile && this.isPhotoCropped) {
@@ -767,10 +755,10 @@ class EditProfile {
 
       console.log('[EditProfile] Sending data:', updatedData);
 
-      // ===== 3. KIRIM KE GAS =====
+      // ===== 3. KIRIM KE GAS WRITE =====
       saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan data...';
       
-      const response = await fetch(this.gasWriteUrl, {
+      await fetch(this.gasWriteUrl, {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -785,7 +773,6 @@ class EditProfile {
 
       console.log('[EditProfile] Request sent (no-cors mode)');
 
-      // ===== 4. SUCCESS =====
       alert('✅ Data identitas berhasil diperbarui!');
       this.modal.style.display = 'none';
       
