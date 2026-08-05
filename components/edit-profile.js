@@ -1,4 +1,4 @@
-// ============ EDIT PROFILE COMPONENT ===========
+// ============ EDIT PROFILE COMPONENT ============
 class EditProfile {
   constructor() {
     this.api = new ProfileDataAPI();
@@ -183,7 +183,7 @@ class EditProfile {
             </div>
             <div>
               <h4 style="color: var(--dark-blue); margin-bottom: 5px;">Foto Profile</h4>
-              <p style="color: var(--gray); font-size: 0.9rem;">Upload foto dengan rasio 1:2 (portrait)</p>
+              <p style="color: var(--gray); font-size: 0.9rem;">Upload foto dengan rasio <strong>4:6</strong> (lebar:panjang)</p>
               <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
                 <button type="button" id="uploadPhotoBtn" style="
                   padding: 8px 20px;
@@ -228,7 +228,7 @@ class EditProfile {
               </button>
             </div>
             <p style="color: var(--gray); margin-bottom: 15px; font-size: 0.9rem;">
-              <i class="fas fa-info-circle"></i> Sesuaikan foto dengan rasio 1:2 (lebar:panjang)
+              <i class="fas fa-info-circle"></i> Sesuaikan foto dengan rasio <strong>4:6</strong> (lebar:panjang) - Ukuran akhir 400x600px
             </p>
             <div style="position: relative; width: 100%; max-width: 500px; margin: 0 auto;">
               <img id="cropImage" src="" alt="Crop" style="width: 100%; display: block; border-radius: 8px;">
@@ -423,7 +423,6 @@ class EditProfile {
     this.openCropModal = () => {
       if (!this.photoDataUrl) return;
       
-      // Pastikan Cropper sudah siap
       if (!this.cropperReady) {
         alert('Library crop sedang dimuat. Silakan tunggu sebentar.');
         this.loadCropperJS().then(() => {
@@ -438,16 +437,15 @@ class EditProfile {
       cropImage.src = this.photoDataUrl;
 
       cropImage.onload = () => {
-        // Destroy cropper lama jika ada
         if (this.cropper) {
           this.cropper.destroy();
           this.cropper = null;
         }
         
-        // Inisialisasi Cropper baru
         try {
+          // ===== RASIO 4:6 (LEBAR 4 : TINGGI 6) =====
           this.cropper = new Cropper(cropImage, {
-            aspectRatio: 1 / 2,
+            aspectRatio: 4 / 6,
             viewMode: 1,
             dragMode: 'move',
             autoCropArea: 0.8,
@@ -459,7 +457,7 @@ class EditProfile {
             cropBoxResizable: true,
             toggleDragModeOnDblclick: false
           });
-          console.log('[EditProfile] Cropper initialized');
+          console.log('[EditProfile] Cropper initialized with ratio 4:6');
         } catch (error) {
           console.error('[EditProfile] Error init Cropper:', error);
           alert('Gagal menginisialisasi crop. Silakan coba lagi.');
@@ -487,9 +485,10 @@ class EditProfile {
       }
 
       try {
+        // ===== UKURAN OUTPUT 400x600 (4:6) =====
         const canvas = this.cropper.getCroppedCanvas({
           width: 400,
-          height: 800,
+          height: 600,
           imageSmoothingEnabled: true,
           imageSmoothingQuality: 'high'
         });
@@ -505,26 +504,22 @@ class EditProfile {
             return;
           }
 
-          // Simpan file hasil crop
           this.photoFile = new File([blob], `${this.nip}_${Date.now()}.jpg`, {
             type: 'image/jpeg'
           });
 
-          // Update preview
           const preview = document.getElementById('photoPreview');
           if (preview) {
             preview.innerHTML = `<img src="${canvas.toDataURL('image/jpeg')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
             preview.style.background = 'none';
           }
 
-          // Update status
           const status = document.getElementById('photoStatus');
           if (status) {
-            status.textContent = '✅ Foto baru siap diupload';
+            status.textContent = '✅ Foto baru siap diupload (4:6)';
             status.style.color = 'var(--success)';
           }
 
-          // Tampilkan tombol hapus
           const removeBtn = document.getElementById('removePhotoBtn');
           if (removeBtn) {
             removeBtn.style.display = 'inline-flex';
