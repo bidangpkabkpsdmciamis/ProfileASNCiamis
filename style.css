@@ -1147,6 +1147,27 @@ h1, h2, h3, h4, h5 {
   animation: fadeIn 0.6s ease forwards;
 }
 
+/* ===== PROFILE STYLES ===== */
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  flex-shrink: 0;
+  overflow: hidden; /* PENTING: agar gambar tidak keluar dari lingkaran */
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* PENTING: agar gambar memenuhi lingkaran */
+}
+
 /* ===== UTILITY ===== */
 .text-center {
   text-align: center;
