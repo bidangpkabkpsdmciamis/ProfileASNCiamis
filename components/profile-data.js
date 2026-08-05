@@ -1,7 +1,7 @@
 // ============ PROFILE DATA API ============
 class ProfileDataAPI {
   constructor() {
-    this.baseUrl = window.CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbz0Gxvtrf5j4gZrKimdMAnde8wmrQiALmdURC65cAsIQJhxicd-xn_2e_8Mp8eV0ZtM6Q/exec';
+    this.baseUrl = window.CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbyxlEVw146kO39Yq3U7zPholU8JK1lLZj0RndoXt4ADBvtlLfCVrELs3lPK1FgFvvU4uw/exec';
     this.nip = window.CONFIG?.NIP || '';
     
     console.log('[ProfileDataAPI] Menggunakan GAS URL:', this.baseUrl);
@@ -38,7 +38,7 @@ class ProfileDataAPI {
     }
   }
 
-  // ===== GET REKAP KOMPETENSI (DIPERBARUI) =====
+  // ===== GET REKAP KOMPETENSI =====
   async getRekapKompetensi(tahun = 'all') {
     if (!this.nip) {
       throw new Error('NIP tidak ditemukan');
@@ -55,12 +55,10 @@ class ProfileDataAPI {
         throw new Error(result.error || 'Gagal mengambil data rekap kompetensi');
       }
       
-      // Pastikan data memiliki field Link_Sertifikat
       const data = result.data;
       if (data && data.data) {
         data.data = data.data.map(item => ({
           ...item,
-          // Support berbagai kemungkinan nama kolom
           Link_Sertifikat: item.Link_Sertifikat || item.link_sertifikat || item['Link Sertifikat'] || item['link_sertifikat'] || '-'
         }));
       }
