@@ -3,11 +3,11 @@ const CONFIG = {
   // GAS URL untuk READ (membaca data)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   
-  // GAS URL untuk WRITE (menyimpan data + upload foto) - URL TERBARU
+  // GAS URL untuk WRITE 
   GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxTZof3_fsE0UE3CkXxNb71iDkuGPIp-AlHGKg5MOiiP21XRAwSwYTqrIoUYYReAQ61cg/exec',
   
   // ===== GITHUB CONFIG - HANYA REFERENSI =====
-  // TOKEN DISIMPAN DI GAS, BUKAN DI SINI!
+
   GITHUB_REPO: 'bidangpkabkpsdmciamis/ProfileASNCiamis',
   GITHUB_BRANCH: 'main',
   
