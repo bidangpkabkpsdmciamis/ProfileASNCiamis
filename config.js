@@ -3,11 +3,13 @@ const CONFIG = {
   // GAS URL untuk READ (membaca data)
   GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
   
-  // GAS URL untuk WRITE 
-  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxxaqYS3OiDeGHTBJ5PxGDHncAvfB2NOEJSFxVPJE9RnqftwyX_Rs17yAoZBawNNubPxg/exec',
+  // GAS URL untuk WRITE (update identitas ke spreadsheet)
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbw8TCo4rVmDgGMSZgm-mJzbkSoaY8rj90pJvbEqRWDMafAES4bLSCB44TVyOMI_cixazw/exec',
   
-  // ===== GITHUB CONFIG - HANYA REFERENSI =====
-
+  // GAS URL untuk UPLOAD FOTO (khusus upload ke GitHub)
+  GAS_UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbyloiCR0XYjTQFN3QT0Hzv34RdvFabPToyQ7o_ylM_4OqfypgEQGRuXbwhUL7djqiZb/exec', 
+  
+  // Referensi GitHub (token di GAS Upload)
   GITHUB_REPO: 'bidangpkabkpsdmciamis/ProfileASNCiamis',
   GITHUB_BRANCH: 'main',
   
