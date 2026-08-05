@@ -1,4 +1,4 @@
-// ============ EDIT PROFILE COMPONENT ============
+// ============ EDIT PROFILE COMPONENT ===========
 class EditProfile {
   constructor() {
     this.api = new ProfileDataAPI();
