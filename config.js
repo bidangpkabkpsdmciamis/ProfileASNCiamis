@@ -1,17 +1,10 @@
 // ============ KONFIGURASI ============
 const CONFIG = {
   // GAS URL untuk READ (membaca data)
-  GAS_URL: 'https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyxlEVw146kO39Yq3U7zPholU8JK1lLZj0RndoXt4ADBvtlLfCVrELs3lPK1FgFvvU4uw/exec',
   
   // GAS URL untuk WRITE (update identitas ke spreadsheet)
-  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbw8TCo4rVmDgGMSZgm-mJzbkSoaY8rj90pJvbEqRWDMafAES4bLSCB44TVyOMI_cixazw/exec',
-  
-  // GAS URL untuk UPLOAD FOTO (khusus upload ke GitHub)
-  GAS_UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbxVLUhU6-LE6YHT9POvh_vvyPjp0LpjfO59O6tXMetNy5CvMiVzy03-ZmWkBFSGQKot/exec', 
-  
-  // Referensi GitHub (token di GAS Upload)
-  GITHUB_REPO: 'bidangpkabkpsdmciamis/ProfileASNCiamis',
-  GITHUB_BRANCH: 'main',
+  GAS_WRITE_URL: 'https://script.google.com/macros/s/AKfycbxL071bWbt9CqjFsd0xUaxYZCR9U9itY1GVlulOYJor0f3hIoQBKmiwqRkFu2tFlP6swg/exec',
   
   NIP: '',
   USER_NAME: 'Guest',
