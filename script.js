@@ -99,6 +99,24 @@ function updateUserInfo() {
   if (dropdownEmailEl) dropdownEmailEl.textContent = email;
 }
 
+// ============ UPDATE HEADER DENGAN FOTO ============
+function updateHeaderPhoto(photoData) {
+  const headerIcon = document.getElementById('headerUserIcon');
+  if (!headerIcon) return;
+  
+  if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+    headerIcon.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    headerIcon.style.background = 'none';
+    headerIcon.style.padding = '0';
+    console.log('[Profile] ✅ Foto header diperbarui');
+  } else {
+    headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+    headerIcon.style.background = '';
+    headerIcon.style.padding = '';
+    console.log('[Profile] ℹ️ Menggunakan icon default di header');
+  }
+}
+
 // ============ SHOW LOCKED OVERLAY ============
 function showLockedOverlay() {
   if (document.getElementById('lockedOverlay')) return;
@@ -160,26 +178,33 @@ async function loadIdentitas() {
       return;
     }
 
-    // ===== UPDATE AVATAR DENGAN FOTO (BASE64) =====
+    // ===== UPDATE AVATAR DI PROFILE =====
     const avatarEl = document.getElementById('profileAvatar') || document.querySelector('.profile-avatar');
     if (avatarEl) {
       const photoData = data.Foto_Profile || '';
       
       if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
         avatarEl.innerHTML = `<img src="${photoData}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user-circle\\'></i>';">`;
-        console.log('[Profile] ✅ Foto ditampilkan (base64/URL)');
+        console.log('[Profile] ✅ Foto profile ditampilkan');
       } else {
         avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
         console.log('[Profile] ℹ️ Tidak ada foto, menggunakan icon default');
       }
     }
     
+    // ===== UPDATE HEADER (POJOK KANAN) DENGAN FOTO =====
+    const photoData = data.Foto_Profile || '';
+    updateHeaderPhoto(photoData);
+    
+    // ===== UPDATE NAMA =====
     const nameEl = document.getElementById('profileName');
     if (nameEl) nameEl.textContent = data.Nama || window.CONFIG?.USER_NAME || 'ASN';
     
+    // ===== UPDATE NIP =====
     const nipEl = document.getElementById('profileNip');
     if (nipEl) nipEl.textContent = `NIP: ${data.NIP || window.CONFIG?.NIP || '-'}`;
     
+    // ===== UPDATE STATUS =====
     const badgeEl = document.getElementById('profileStatus');
     if (badgeEl) {
       badgeEl.textContent = data.Status_ASN || 'ASN';
@@ -344,6 +369,14 @@ function initHeader() {
       localStorage.removeItem('loginData');
       sessionStorage.removeItem('redirectAfterLogin');
       
+      // ===== RESET HEADER KE DEFAULT =====
+      const headerIcon = document.getElementById('headerUserIcon');
+      if (headerIcon) {
+        headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+        headerIcon.style.background = '';
+        headerIcon.style.padding = '';
+      }
+      
       console.log('[Profile] ✅ Logout: Semua data login dihapus');
       
       alert('Anda telah keluar dari sistem.');
@@ -397,4 +430,5 @@ function initMobileToggle() {
 window.openEditProfile = openEditProfile;
 window.loadIdentitas = loadIdentitas;
 window.updateUserInfo = updateUserInfo;
+window.updateHeaderPhoto = updateHeaderPhoto;
 window.setupEditButton = setupEditButton;
